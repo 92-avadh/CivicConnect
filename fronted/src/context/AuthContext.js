@@ -1,72 +1,85 @@
-// src/context/AuthContext.js
-import React, { createContext, useState, useEffect } from "react";
-import axios from "axios";
+import React, { createContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
-export const AuthContext = createContext();
+export const AuthContext = createContext(null);
+
+const API_URL = 'http://localhost:5000/api';
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem("token") || null);
+    const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    if (token) {
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      if (storedUser) {
-        setUser(storedUser);
-      }
-    }
-  }, [token]);
+    useEffect(() => {
+        const storedToken = localStorage.getItem('authToken');
+        const storedUser = localStorage.getItem('user');
+        if (storedToken && storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+    }, []);
 
-  const login = async (email, password) => {
-    try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password,
-      });
+    const login = async (email, password) => {
+        try {
+            const res = await axios.post(`${API_URL}/auth/login`, { email, password });
+            if (res.data.success) {
+                const userData = res.data.user;
+                setUser(userData);
+                localStorage.setItem('authToken', res.data.token);
+                localStorage.setItem('user', JSON.stringify(userData));
+                return { success: true };
+            }
+        } catch (error) {
+            return { success: false, message: error.response?.data?.message || "Login failed." };
+        }
+    };
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+    const register = async (formData, userType) => {
+        try {
+            const endpoint = userType === 'official' ? '/auth/register-official' : '/auth/register-user';
+            const res = await axios.post(`${API_URL}${endpoint}`, formData);
+            return res.data;
+        } catch (error) {
+            return { success: false, message: error.response?.data?.message || "Registration failed." };
+        }
+    };
 
-      setToken(res.data.token);
-      setUser(res.data.user);
+    const reportIssue = async (reportData) => {
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                return { success: false, message: "Authentication token not found. Please log in." };
+            }
 
-      return { success: true };
-    } catch (err) {
-      return {
-        success: false,
-        message: err.response?.data?.message || "Login failed",
-      };
-    }
-  };
+            const formData = new FormData();
+            formData.append('title', reportData.title);
+            formData.append('description', reportData.description);
+            formData.append('category', reportData.category);
 
-  const register = async (name, email, password, role) => {
-    try {
-      const res = await axios.post("http://localhost:5000/api/auth/register", {
-        name,
-        email,
-        password,
-        role,
-      });
+            if (reportData.images && reportData.images.length > 0) {
+                reportData.images.forEach(imageFile => {
+                    formData.append('images', imageFile);
+                });
+            }
 
-      return { success: true, data: res.data };
-    } catch (err) {
-      return {
-        success: false,
-        message: err.response?.data?.message || "Registration failed",
-      };
-    }
-  };
+            const res = await axios.post(`${API_URL}/issues/create`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'x-auth-token': token
+                }
+            });
+            return { success: true, data: res.data };
+        } catch (error) {
+            return { success: false, message: error.response?.data?.message || "Failed to report issue." };
+        }
+    };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setToken(null);
-    setUser(null);
-  };
+    const logout = () => {
+        setUser(null);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+    };
 
-  return (
-    <AuthContext.Provider value={{ user, token, login, register, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+    return (
+        <AuthContext.Provider value={{ user, login, register, logout, reportIssue }}>
+            {children}
+        </AuthContext.Provider>
+    );
 };

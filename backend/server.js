@@ -1,51 +1,45 @@
-import dotenv from 'dotenv';
-dotenv.config();
 import express from 'express';
+import dotenv from 'dotenv';
 import cors from 'cors';
-
-import mongoose from 'mongoose';
-import session from 'express-session';
-import passport from 'passport';
-
-import './config/passport.js';
+import path from 'path';
+import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
-import issueRoutes from './routes/issueRoutes.js';
+import issueRoutes from './routes/issueRoutes.js'; // Import issue routes
 
-
+dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
+// --- MIDDLEWARE ---
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static('uploads'));
 
-// Google session setup
-app.use(session({
-  secret: 'your-session-secret',
-  resave: false,
-  saveUninitialized: false
-}));
+// --- DATABASE CONNECTION ---
+connectDB();
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => {
-  console.log('✅ MongoDB connected');
-}).catch(err => {
-  console.error('❌ MongoDB connection error:', err);
-});
-
+// --- API ROUTES ---
 app.use('/api/auth', authRoutes);
-app.use('/api/issues', issueRoutes);
+app.use('/api/issues', issueRoutes); // Use issue routes
 
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello from backend!' });
-});
+// --- SERVE UPLOADED FILES ---
+const __dirname = path.resolve();
+// This makes the 'uploads' folder public so images can be accessed by their URL
+app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
+// --- DEPLOYMENT CONFIGURATION ---
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '/frontend/build')));
+    app.get('*', (req, res) =>
+        res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'))
+    );
+} else {
+    app.get('/', (req, res) => {
+        res.status(200).send('<h1>CivicConnect API is running!</h1>');
+    });
+}
+
+// --- SERVER STARTUP ---
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+    console.log(`Server is running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });
