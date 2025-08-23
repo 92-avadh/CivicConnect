@@ -4,7 +4,7 @@ import { KeyOfficials } from '../components/KeyOfficials';
 
 export const HomePage = ({ loggedIn, handleTabChange, handleReportClick, handleRoleSelection }) => {
     const quickLinks = [
-        { name: 'Pay Property Tax', icon: '�', tab: 'property-tax' },
+        { name: 'Pay Property Tax', icon: '🏠', tab: 'property-tax' },
         { name: 'Birth Certificate', icon: '👶', tab: 'birth-certificate' },
         { name: 'Death Certificate', icon: '🕊️', tab: 'death-certificate' },
         { name: 'Water Connection', icon: '💧', tab: 'water-connection' },
