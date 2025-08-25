@@ -1,19 +1,17 @@
-import express from 'express';
+import express from "express";
 import {
-    registerUserController,
-    registerOfficialController,
-    loginController
-} from '../controllers/authController.js';
+  registerUserController,
+  loginUserController,
+  loginOfficialController,
+} from "../controllers/authController.js";
 
 const router = express.Router();
 
-// Register a new Citizen (User)
-router.post('/register-user', registerUserController);
+// ----------------- Citizen -----------------
+router.post("/register-user", registerUserController);  // Citizen Registration
+router.post("/login-user", loginUserController);        // Citizen Login
 
-// Register a new Government Official
-router.post('/register-official', registerOfficialController);
-
-// Login for both Users and Officials
-router.post('/login', loginController);
+// ----------------- Official -----------------
+router.post("/login-official", loginOfficialController); // Official Login (No registration)
 
 export default router;

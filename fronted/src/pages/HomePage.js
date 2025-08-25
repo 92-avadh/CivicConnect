@@ -24,8 +24,12 @@ export const HomePage = ({ loggedIn, handleTabChange, handleReportClick, handleR
         <div className="relative bg-white">
             <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
                 <div className="text-center">
-                    <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Welcome to CivicConnect Surat</h1>
-                    <p className="mt-4 text-lg text-gray-600">Your one-stop portal for all municipal services and civic engagement.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                        Welcome to CivicConnect Surat
+                    </h1>
+                    <p className="mt-4 text-lg text-gray-600">
+                        Your one-stop portal for all municipal services and civic engagement.
+                    </p>
                 </div>
             </div>
         </div>
@@ -36,7 +40,9 @@ export const HomePage = ({ loggedIn, handleTabChange, handleReportClick, handleR
                 <h2 className="text-2xl font-semibold text-gray-800 text-center mb-8">Quick Links</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-center">
                     {quickLinks.map(link => (
-                        <a key={link.name} onClick={link.action || (() => handleTabChange(link.tab))} className="p-4 bg-gray-100 rounded-lg hover:bg-blue-100 hover:shadow-md cursor-pointer transition">
+                        <a key={link.name} 
+                           onClick={link.action || (() => handleTabChange(link.tab))} 
+                           className="p-4 bg-gray-100 rounded-lg hover:bg-blue-100 hover:shadow-md cursor-pointer transition">
                             <div className="text-3xl mb-2">{link.icon}</div>
                             <p className="text-sm font-medium text-gray-700">{link.name}</p>
                         </a>
@@ -45,6 +51,7 @@ export const HomePage = ({ loggedIn, handleTabChange, handleReportClick, handleR
             </div>
         </div>
         
+        {/* News & Learning Hub */}
         <div className="py-12 bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* News & Updates */}
@@ -63,25 +70,27 @@ export const HomePage = ({ loggedIn, handleTabChange, handleReportClick, handleR
                 </div>
                 {/* Learning Hub */}
                 <div className="lg:col-span-1 space-y-6">
-                     <h2 className="text-2xl font-semibold text-gray-800 mb-6">Learn & Participate</h2>
-                     <div className="bg-white rounded-lg shadow-sm p-6 cursor-pointer hover:shadow-md transition" onClick={() => handleTabChange('civic-sense')}>
-                         <div className="flex items-center space-x-4">
-                             <div className="text-3xl">💡</div>
-                             <div>
-                                 <h3 className="font-semibold text-gray-800">Civic Sense Corner</h3>
-                                 <p className="text-sm text-gray-600">Learn about responsible citizenship.</p>
-                             </div>
-                         </div>
-                     </div>
-                     <div className="bg-white rounded-lg shadow-sm p-6 cursor-pointer hover:shadow-md transition" onClick={() => handleTabChange('law')}>
-                         <div className="flex items-center space-x-4">
-                             <div className="text-3xl">⚖️</div>
-                             <div>
-                                 <h3 className="font-semibold text-gray-800">Law Literacy Lounge</h3>
-                                 <p className="text-sm text-gray-600">Understand your rights and duties.</p>
-                             </div>
-                         </div>
-                     </div>
+                      <h2 className="text-2xl font-semibold text-gray-800 mb-6">Learn & Participate</h2>
+                      <div className="bg-white rounded-lg shadow-sm p-6 cursor-pointer hover:shadow-md transition" 
+                           onClick={() => handleTabChange('civic-sense')}>
+                          <div className="flex items-center space-x-4">
+                              <div className="text-3xl">💡</div>
+                              <div>
+                                  <h3 className="font-semibold text-gray-800">Civic Sense Corner</h3>
+                                  <p className="text-sm text-gray-600">Learn about responsible citizenship.</p>
+                              </div>
+                          </div>
+                      </div>
+                      <div className="bg-white rounded-lg shadow-sm p-6 cursor-pointer hover:shadow-md transition" 
+                           onClick={() => handleTabChange('law')}>
+                          <div className="flex items-center space-x-4">
+                              <div className="text-3xl">⚖️</div>
+                              <div>
+                                  <h3 className="font-semibold text-gray-800">Law Literacy Lounge</h3>
+                                  <p className="text-sm text-gray-600">Understand your rights and duties.</p>
+                              </div>
+                          </div>
+                      </div>
                 </div>
             </div>
         </div>
@@ -91,19 +100,31 @@ export const HomePage = ({ loggedIn, handleTabChange, handleReportClick, handleR
           <div id="role-selection-section" className="py-12 bg-white">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
               <h2 className="text-2xl font-semibold text-gray-800">Join CivicConnect</h2>
-              <p className="mt-2 text-gray-600">Register as a citizen or an official to get started.</p>
+              <p className="mt-2 text-gray-600">Register as a citizen or login as an official to get started.</p>
               <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Citizen Register */}
                 <div className="bg-gray-50 p-8 rounded-lg border border-gray-200">
                     <div className="text-4xl">👥</div>
                     <h3 className="mt-4 text-lg font-semibold text-gray-800">Citizen</h3>
-                    <p className="mt-2 text-sm text-gray-600">Report issues, track progress, and help improve our city.</p>
-                    <button onClick={() => handleRoleSelection('citizen')} className="mt-6 px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-blue-700">Register as Citizen</button>
+                    <p className="mt-2 text-sm text-gray-600">Register to report issues, track progress, and help improve our city.</p>
+                    {/* ✅ FIXED: Changed to 'citizen-register' */}
+                    <button 
+                      onClick={() => handleTabChange('citizen-register')} 
+                      className="mt-6 px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-blue-700">
+                        Citizen Register
+                    </button>
                 </div>
+                {/* Official Login */}
                 <div className="bg-gray-50 p-8 rounded-lg border border-gray-200">
                     <div className="text-4xl">👔</div>
                     <h3 className="mt-4 text-lg font-semibold text-gray-800">Government Official</h3>
-                    <p className="mt-2 text-sm text-gray-600">Manage issues, coordinate with departments, and serve citizens.</p>
-                    <button onClick={() => handleRoleSelection('official')} className="mt-6 px-5 py-2 bg-gray-700 text-white text-sm font-medium rounded-md shadow-sm hover:bg-gray-800">Official Login</button>
+                    <p className="mt-2 text-sm text-gray-600">Login to manage issues, coordinate with departments, and serve citizens.</p>
+                    {/* ✅ FIXED: Changed to 'official-login' */}
+                    <button 
+                      onClick={() => handleTabChange('official-login')} 
+                      className="mt-6 px-5 py-2 bg-gray-700 text-white text-sm font-medium rounded-md shadow-sm hover:bg-gray-800">
+                        Official Login
+                    </button>
                 </div>
               </div>
             </div>

@@ -1,52 +1,64 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 
-const CitizenRegisterPage = ({
-  formData,
-  handleInputChange,
-  handleRegister,
-  handleTabChange,
-  phoneError,
-  passwordError,
-  resetForm,
-}) => {
+const CitizenRegisterPage = ({ handleTabChange }) => {
+  const { register } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [agree, setAgree] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [agree, setAgree] = useState(false);
 
-  const isButtonDisabled =
-    !formData.firstName ||
-    !formData.lastName ||
-    !formData.email ||
-    !formData.phone ||
-    !formData.password ||
-    !formData.confirmPassword ||
-    !agree ||
-    phoneError ||
-    passwordError;
+  // Validation
+  const isValidPhone = /^\d{10}$/.test(phone);
+  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isValidPassword =
+    /^(?=.*[A-Z])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/.test(password);
+  const isPasswordMatch = password === confirmPassword;
+
+  const isFormValid =
+    firstName.trim() &&
+    lastName.trim() &&
+    isValidPhone &&
+    isValidEmail &&
+    isValidPassword &&
+    isPasswordMatch &&
+    agree;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
 
-    if (isButtonDisabled) {
-      setError("Please fill all fields correctly and agree to the terms.");
+    if (!isFormValid) {
+      setError("Please fill all fields correctly and accept the terms.");
       return;
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    const result = await handleRegister(formData, "citizen");
+    const result = await register({ firstName, lastName, phone, email, password });
 
     if (result.success) {
-      handleTabChange("login");
+      setSuccess("Registration successful! Please login.");
+      // Clear form
+      setFirstName("");
+      setLastName("");
+      setPhone("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
       setAgree(false);
-      resetForm();
-    } else if (result.message?.toLowerCase().includes("already")) {
-      setError(result.message);
+
+      setTimeout(() => navigate("/citizen-login"), 2000);
     } else {
       setError(result.message);
     }
@@ -54,125 +66,94 @@ const CitizenRegisterPage = ({
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-lg">
-        {/* Back Button */}
-        <button
-          // ✅ FIXED: Resets the form before changing the page
-          onClick={() => {
-            resetForm();
-            handleTabChange("home");
-          }}
-          className="text-gray-600 mb-4 flex items-center hover:text-gray-800"
-        >
-          ← Back to Home
-        </button>
-
+      <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
           Citizen Registration
         </h2>
 
-        {error && (
-          <div className="bg-red-100 text-red-600 p-3 rounded-lg mb-4 text-sm text-center">
-            {error}
-          </div>
-        )}
+        {error && <p className="text-red-500 text-center mb-3">{error}</p>}
+        {success && <p className="text-green-600 text-center mb-3">{success}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="flex space-x-3">
+          <div className="flex space-x-4">
             <input
               type="text"
               placeholder="First Name"
-              value={formData.firstName}
-              onChange={(e) => handleInputChange("firstName", e.target.value)}
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
               className="w-1/2 px-4 py-3 border rounded-lg"
+              required
             />
             <input
               type="text"
               placeholder="Last Name"
-              value={formData.lastName}
-              onChange={(e) => handleInputChange("lastName", e.target.value)}
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
               className="w-1/2 px-4 py-3 border rounded-lg"
+              required
             />
           </div>
 
           <input
-            type="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={(e) => handleInputChange("email", e.target.value)}
-            className="w-full px-4 py-3 border rounded-lg"
+            type="text"
+            placeholder="Phone"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+            className={`w-full px-4 py-3 border rounded-lg ${
+              phone && !isValidPhone ? "border-red-500" : ""
+            }`}
+            required
           />
 
           <input
-            type="tel"
-            placeholder="Phone Number"
-            value={formData.phone}
-            onChange={(e) => handleInputChange("phone", e.target.value)}
-            className="w-full px-4 py-3 border rounded-lg"
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={`w-full px-4 py-3 border rounded-lg ${
+              email && !isValidEmail ? "border-red-500" : ""
+            }`}
+            required
           />
-          {phoneError && <p className="text-red-500 text-sm">{phoneError}</p>}
 
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Password"
-              value={formData.password}
-              onChange={(e) => handleInputChange("password", e.target.value)}
-              className="w-full px-4 py-3 border rounded-lg pr-12"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={`w-full px-4 py-3 border rounded-lg pr-10 ${
+                password && !isValidPassword ? "border-red-500" : ""
+              }`}
+              required
             />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-              <svg
-                onClick={() => setShowPassword(!showPassword)}
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 text-gray-700 cursor-pointer"
-                fill="none"
-                viewBox="0 0 24"
-                stroke="currentColor"
-              >
-                {showPassword ? (
-                  <>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
-                  </>
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.543-3.825m7.543-2.43L12 5c4.478 0 8.268 2.943 9.543 7a9.97 9.97 0 01-1.543 3.825m-7.543-2.43a3 3 0 11-4.243-4.243 3 3 0 014.243 4.243z" />
-                )}
-              </svg>
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-3 text-gray-500"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
-          {passwordError && (
-            <p className="text-red-500 text-sm">{passwordError}</p>
-          )}
 
           <div className="relative">
             <input
               type={showConfirmPassword ? "text" : "password"}
               placeholder="Confirm Password"
-              value={formData.confirmPassword}
-              onChange={(e) =>
-                handleInputChange("confirmPassword", e.target.value)
-              }
-              className="w-full px-4 py-3 border rounded-lg pr-12"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className={`w-full px-4 py-3 border rounded-lg pr-10 ${
+                confirmPassword && !isPasswordMatch ? "border-red-500" : ""
+              }`}
+              required
             />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-              <svg
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 text-gray-700 cursor-pointer"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                {showConfirmPassword ? (
-                  <>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
-                  </>
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.543-3.825m7.543-2.43L12 5c4.478 0 8.268 2.943 9.543 7a9.97 9.97 0 01-1.543 3.825m-7.543-2.43a3 3 0 11-4.243-4.243 3 3 0 014.243 4.243z" />
-                )}
-              </svg>
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-3 text-gray-500"
+            >
+              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
 
           <div className="flex items-center">
@@ -180,28 +161,27 @@ const CitizenRegisterPage = ({
               type="checkbox"
               id="agreeTerms"
               checked={agree}
-              onChange={() => setAgree(!agree)}
+              onChange={(e) => setAgree(e.target.checked)}
               className="mr-2"
             />
             <label htmlFor="agreeTerms" className="text-sm text-gray-600">
               I agree to the{" "}
-              <button
-                type="button"
-                className="text-blue-600 underline"
+              <span
                 onClick={() => handleTabChange("privacy")}
+                className="text-blue-600 cursor-pointer hover:underline"
               >
-                Terms and Conditions
-              </button>
+                Terms & Conditions
+              </span>
             </label>
           </div>
 
           <button
             type="submit"
-            disabled={isButtonDisabled}
-            className={`w-full text-white py-3 rounded-lg font-bold transition-colors ${
-              isButtonDisabled
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
+            disabled={!isFormValid}
+            className={`w-full py-3 rounded-lg font-bold transition-colors ${
+              isFormValid
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-gray-400 text-gray-200 cursor-not-allowed"
             }`}
           >
             Register

@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { createIssueController, getIssuesController } from '../controllers/issueController.js';
-import auth from '../middleware/auth.js'; // Assuming you have auth middleware here
+import auth from '../middleware/auth.js'; // ✅ FIXED: Added the missing import for the auth middleware
 
 const router = express.Router();
 
@@ -13,11 +13,10 @@ const upload = multer({
 
 // Route for creating a new issue
 // POST /api/issues/create
-// ✅ FIXED: Added auth middleware and multer for file handling
 router.post(
     '/create',
-    auth,
-    upload.array('images', 5), // Expects up to 5 files in a field named 'images'
+    auth, // This will now work correctly
+    upload.array('images', 5),
     createIssueController
 );
 

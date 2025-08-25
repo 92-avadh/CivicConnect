@@ -26,7 +26,8 @@ const officialSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  department: {
+  // ✅ FIXED: Changed field name to match the frontend form
+  departmentId: {
     type: String,
     required: true,
   },
@@ -36,4 +37,4 @@ const officialSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-export default mongoose.model('Official', officialSchema);
+export default mongoose.model('Official', officialSchema); //

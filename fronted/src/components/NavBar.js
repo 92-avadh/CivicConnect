@@ -26,22 +26,26 @@ const NotificationDropdown = ({ notifications, markNotificationsAsRead }) => (
 
 export const NavBar = ({ loggedIn, handleTabChange, handleReportClick, notifications, showNotifications, setShowNotifications, isMenuOpen, setIsMenuOpen, handleLogout, markNotificationsAsRead, currentUser }) => {
     const unreadCount = notifications.filter(n => !n.read).length;
+    const isOfficial = loggedIn && currentUser?.role === 'official';
 
     return (
       <header className="bg-white text-gray-800 shadow-md sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
               <div className="flex items-center space-x-3 cursor-pointer" onClick={() => handleTabChange('home')}>
-                  <img src="https://placehold.co/40x40/003366/FFFFFF?text=CC" alt="CivicConnect Logo" className="h-10 w-10"/>
+                  <img src="https://placehold.co/40x40/0D244F/FFFFFF?text=CC" alt="CivicConnect Logo" className="h-10 w-10"/>
                   <h1 className="text-xl font-bold text-gray-700 tracking-tight">CIVICCONNECT</h1>
               </div>
 
               {/* Desktop Menu */}
               <div className="hidden md:flex items-center space-x-1">
                   <a onClick={() => handleTabChange('home')} className="text-gray-600 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">Home</a>
-                  <a onClick={() => handleTabChange('issues')} className="text-gray-600 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">View Issues</a>
-                  <a onClick={handleReportClick} className="text-gray-600 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">Report an Issue</a>
-                  {loggedIn && currentUser?.role === 'official' && (
-                    <a onClick={() => handleTabChange('dashboard')} className="text-gray-600 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">Dashboard</a>
+                  {isOfficial ? (
+                      <a onClick={() => handleTabChange('issues')} className="text-gray-600 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">All Issues</a>
+                  ) : (
+                      <>
+                        <a onClick={() => handleTabChange('issues')} className="text-gray-600 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">View Issues</a>
+                        <a onClick={handleReportClick} className="text-gray-600 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">Report an Issue</a>
+                      </>
                   )}
                   <a onClick={() => handleTabChange('about')} className="text-gray-600 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">About</a>
                   <a onClick={() => handleTabChange('contact')} className="text-gray-600 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">Contact</a>
@@ -58,9 +62,10 @@ export const NavBar = ({ loggedIn, handleTabChange, handleReportClick, notificat
                       </div>
                   )}
                   {!loggedIn ? (
-                    <button onClick={() => handleTabChange('login')} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-blue-700">Login</button>
+                      // ✅ FIXED: Changed 'login' to 'citizen-login'
+                      <button onClick={() => handleTabChange('citizen-login')} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-blue-700">Login</button>
                   ) : (
-                    <button onClick={() => handleTabChange('profile')} className="px-4 py-2 bg-gray-200 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-300">Profile</button>
+                      <button onClick={() => handleTabChange('profile')} className="px-4 py-2 bg-gray-200 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-300">Profile</button>
                   )}
               </div>
 
@@ -76,21 +81,25 @@ export const NavBar = ({ loggedIn, handleTabChange, handleReportClick, notificat
           {isMenuOpen && (
               <div className="md:hidden px-2 pt-2 pb-3 space-y-1 sm:px-3">
                   <a onClick={() => handleTabChange('home')} className="text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium cursor-pointer">Home</a>
-                  <a onClick={() => handleTabChange('issues')} className="text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium cursor-pointer">View Issues</a>
-                  <a onClick={handleReportClick} className="text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium cursor-pointer">Report an Issue</a>
-                  {loggedIn && currentUser?.role === 'official' && (
-                    <a onClick={() => handleTabChange('dashboard')} className="text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium cursor-pointer">Dashboard</a>
+                  {isOfficial ? (
+                      <a onClick={() => handleTabChange('issues')} className="text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium cursor-pointer">All Issues</a>
+                  ) : (
+                      <>
+                        <a onClick={() => handleTabChange('issues')} className="text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium cursor-pointer">View Issues</a>
+                        <a onClick={handleReportClick} className="text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium cursor-pointer">Report an Issue</a>
+                      </>
                   )}
                   <a onClick={() => handleTabChange('about')} className="text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium cursor-pointer">About</a>
                   <a onClick={() => handleTabChange('contact')} className="text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium cursor-pointer">Contact</a>
                   <div className="border-t border-gray-200 pt-4 mt-4">
                       {!loggedIn ? (
-                        <button onClick={() => handleTabChange('login')} className="w-full text-left text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium">Login</button>
+                          // ✅ FIXED: Changed 'login' to 'citizen-login'
+                          <button onClick={() => handleTabChange('citizen-login')} className="w-full text-left text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium">Login</button>
                       ) : (
-                        <>
-                          <button onClick={() => handleTabChange('profile')} className="w-full text-left text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium">Profile</button>
-                          <button onClick={handleLogout} className="w-full text-left text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium">Logout</button>
-                        </>
+                          <>
+                              <button onClick={() => handleTabChange('profile')} className="w-full text-left text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium">Profile</button>
+                              <button onClick={handleLogout} className="w-full text-left text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium">Logout</button>
+                          </>
                       )}
                   </div>
               </div>

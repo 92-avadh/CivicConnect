@@ -4,9 +4,9 @@ import { AuthContext } from "./context/AuthContext";
 
 // Import Pages
 import { HomePage } from "./pages/HomePage.js";
-import LoginPage from "./pages/LoginPage";
+import CitizenLoginPage from "./pages/CitizenLoginPage.js";
 import CitizenRegisterPage from "./pages/CitizenRegisterPage.js";
-import OfficialRegisterPage from "./pages/OfficialRegisterPage.js";
+import OfficialLoginPage from "./pages/OfficialLoginPage.js";
 import { IssuesPage } from "./pages/IssuesPage.js";
 import { ReportPage } from "./pages/ReportPage.js";
 import { ProfilePage } from "./pages/ProfilePage.js";
@@ -32,7 +32,6 @@ function App() {
   const { register, login, logout, user, reportIssue } = useContext(AuthContext);
 
   const [currentPage, setCurrentPage] = useState(window.location.hash.substring(1) || "home");
-  const [selectedUserType, setSelectedUserType] = useState("");
   const [issues, setIssues] = useState([]);
   const [issuesState, setIssuesState] = useState({ loading: true, error: null });
 
@@ -43,7 +42,7 @@ function App() {
     phone: "",
     password: "",
     confirmPassword: "",
-    agreeToTerms: false,
+    employeeId: "", // ✅ ADDED: Employee ID for the form state
     departmentId: "",
   };
   const [formData, setFormData] = useState(initialFormData);
@@ -56,11 +55,12 @@ function App() {
   };
   const [reportData, setReportData] = useState(initialReportData);
 
+  const [phoneError, setPhoneError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [departmentIdError, setDepartmentIdError] = useState("");
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [phoneError, setPhoneError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
 
   const fetchIssues = async () => {
     try {
@@ -82,15 +82,13 @@ function App() {
     if (user) {
       fetchIssues();
     }
-    return () => {
-      window.removeEventListener("hashchange", handleHashChange);
-    };
   }, [user]);
 
   const resetFormData = () => {
     setFormData(initialFormData);
     setPhoneError("");
     setPasswordError("");
+    setDepartmentIdError("");
   };
 
   const handleTabChange = (tab) => {
@@ -102,37 +100,29 @@ function App() {
   const handleLogout = () => {
     logout();
     resetFormData();
+    setIssues([]);
     handleTabChange("home");
   };
 
-  const addNotification = (message) => {
-    setNotifications((prev) => [
-      { id: Date.now(), message, read: false, date: new Date() },
-      ...prev,
-    ]);
-  };
-  
-  // ✅ FIXED: Added the missing function definition
-  const markNotificationsAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    setShowNotifications(false);
-  };
-
   const handleInputChange = (field, value) => {
-    setFormData((prevData) => ({ ...prevData, [field]: value }));
+    let processedValue = value;
+    if (field === "phone") {
+      const numericValue = value.replace(/\D/g, '');
+      processedValue = numericValue.slice(0, 10);
+    }
+    setFormData((prevData) => ({ ...prevData, [field]: processedValue }));
 
     if (field === "phone") {
       const phoneRegex = /^\d{10}$/;
-      setPhoneError(!phoneRegex.test(value) && value !== "" ? "Phone number must be exactly 10 digits." : "");
+      setPhoneError(!phoneRegex.test(processedValue) && processedValue ? "Phone number must be exactly 10 digits." : "");
     }
-
     if (field === "password") {
       const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/;
-      setPasswordError(
-        !passwordRegex.test(value) && value !== ""
-          ? "Password must be 8+ characters, with one uppercase letter and one special character."
-          : ""
-      );
+      setPasswordError(!passwordRegex.test(value) && value ? "Password needs 8+ chars, 1 uppercase, 1 special." : "");
+    }
+    if (field === "departmentId") {
+      const deptIdRegex = /^\d{8}$/;
+      setDepartmentIdError(!deptIdRegex.test(value) && value ? "Department ID must be 8 digits." : "");
     }
   };
 
@@ -140,8 +130,8 @@ function App() {
     return await register(formData, userType);
   };
 
-  const handleReportInputChange = (field, value) => {
-    setReportData((prevData) => ({ ...prevData, [field]: value }));
+  const handleRoleSelection = (role) => {
+    handleTabChange(role === "citizen" ? "citizen-register" : "official-login");
   };
 
   const handleReportSubmit = async (e) => {
@@ -163,10 +153,7 @@ function App() {
       alert("You can only upload a maximum of 5 files.");
       return;
     }
-    setReportData((prev) => ({
-      ...prev,
-      images: [...prev.images, ...newFiles],
-    }));
+    setReportData((prev) => ({ ...prev, images: [...prev.images, ...newFiles] }));
   };
 
   const handleRemoveImage = (indexToRemove) => {
@@ -176,65 +163,56 @@ function App() {
     }));
   };
 
-  const handleRoleSelection = (role) => {
-    setSelectedUserType(role);
-    handleTabChange(role === "citizen" ? "register-citizen" : "register-official");
-  };
-
-  const handleReportClick = () => {
-    if (user) handleTabChange("report");
-    else handleTabChange("login");
+  const markNotificationsAsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setShowNotifications(false);
   };
 
   const renderPage = () => {
     const page = currentPage.split("?")[0].split("#")[0] || "home";
     switch (page) {
       case "home":
-        return <HomePage loggedIn={!!user} handleTabChange={handleTabChange} handleReportClick={handleReportClick} handleRoleSelection={handleRoleSelection} />;
-      case "login":
-        return <LoginPage handleTabChange={handleTabChange} />;
-      case "register-citizen":
+        return <HomePage loggedIn={!!user} handleTabChange={handleTabChange} handleReportClick={() => user ? handleTabChange("report") : handleTabChange("citizen-login")} handleRoleSelection={handleRoleSelection} />;
+      case "citizen-login":
+        return <CitizenLoginPage handleTabChange={handleTabChange} login={login} />;
+      case "citizen-register":
         return <CitizenRegisterPage formData={formData} handleInputChange={handleInputChange} handleRegister={handleRegister} handleTabChange={handleTabChange} phoneError={phoneError} passwordError={passwordError} resetForm={resetFormData} />;
-      case "register-official":
-        return <OfficialRegisterPage formData={formData} handleInputChange={handleInputChange} handleRegister={handleRegister} handleTabChange={handleTabChange} resetForm={resetFormData} />;
+      case "official-login":
+        return <OfficialLoginPage formData={formData} handleInputChange={handleInputChange} handleTabChange={handleTabChange} departmentIdError={departmentIdError} resetForm={resetFormData} login={login} handleRegister={handleRegister} />;
       case "report":
-        return user ? (
-          <ReportPage reportData={reportData} handleReportInputChange={handleReportInputChange} handleImageUpload={handleImageUpload} handleReportSubmit={handleReportSubmit} handleRemoveImage={handleRemoveImage} />
-        ) : (
-          <LoginPage handleTabChange={handleTabChange} />
-        );
+        return <ReportPage reportData={reportData} handleReportInputChange={handleInputChange} handleImageUpload={handleImageUpload} handleReportSubmit={handleReportSubmit} handleRemoveImage={handleRemoveImage} />;
       case "issues":
         return <IssuesPage issues={issues} loggedIn={!!user} currentUser={user} issuesState={issuesState} />;
       case "profile":
-        return user ? <ProfilePage currentUser={user} issues={issues} handleLogout={handleLogout} /> : <LoginPage handleTabChange={handleTabChange} />;
-      case "forgot-password":
-        return <ForgotPasswordPage handleTabChange={handleTabChange} />;
+        return user ? <ProfilePage currentUser={user} issues={issues} handleLogout={handleLogout} /> : <CitizenLoginPage handleTabChange={handleTabChange} login={login} />;
+      case "about":
+        return <AboutPage />;
+      case "contact":
+        return <ContactPage />;
       case "civic-sense":
         return <CivicSensePage />;
       case "law":
         return <LawPage />;
-      case "about":
-        return <AboutPage />;
       case "privacy":
         return <PrivacyPolicyPage />;
       case "services":
         return <ServicesPage handleTabChange={handleTabChange} />;
       case "track":
         return <TrackApplicationPage handleTabChange={handleTabChange} />;
-      case "property-tax":
-        return <PropertyTaxPage handleTabChange={handleTabChange} />;
       case "birth-certificate":
         return <BirthCertificatePage handleTabChange={handleTabChange} />;
       case "death-certificate":
         return <DeathCertificatePage handleTabChange={handleTabChange} />;
       case "water-connection":
         return <WaterConnectionPage handleTabChange={handleTabChange} />;
-      case "contact":
-        return <ContactPage />;
+      case "forgot-password":
+        return <ForgotPasswordPage handleTabChange={handleTabChange} />;
       case "dashboard":
         return user?.role === "official" ? <AdminDashboardPage /> : <HomePage />;
+      case "property-tax":
+        return <PropertyTaxPage handleTabChange={handleTabChange} />;
       default:
-        return <HomePage loggedIn={!!user} handleTabChange={handleTabChange} handleReportClick={handleReportClick} handleRoleSelection={handleRoleSelection} />;
+        return <HomePage loggedIn={!!user} handleTabChange={handleTabChange} handleReportClick={() => user ? handleTabChange("report") : handleTabChange("citizen-login")} handleRoleSelection={handleRoleSelection} />;
     }
   };
 
@@ -243,7 +221,7 @@ function App() {
       <NavBar
         loggedIn={!!user}
         handleTabChange={handleTabChange}
-        handleReportClick={handleReportClick}
+        handleReportClick={() => user ? handleTabChange("report") : handleTabChange("citizen-login")}
         notifications={notifications}
         showNotifications={showNotifications}
         setShowNotifications={setShowNotifications}
@@ -256,7 +234,7 @@ function App() {
       <main>
         <div key={currentPage} className="page-container">{renderPage()}</div>
       </main>
-      <Footer handleTabChange={handleTabChange} handleReportClick={handleReportClick} />
+      <Footer handleTabChange={handleTabChange} />
     </div>
   );
 }

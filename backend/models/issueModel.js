@@ -1,10 +1,9 @@
 import mongoose from 'mongoose';
 
 const issueSchema = new mongoose.Schema({
-    // ✅ ADDED: Link to the user who created the issue
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // This links to your userModel
+        ref: 'User',
         required: true,
     },
     title: {
@@ -15,20 +14,17 @@ const issueSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    // ✅ ADDED: Category field to match the frontend form
     category: {
         type: String,
         required: true,
     },
-    // ✅ CHANGED: Renamed 'location' to 'category' in the old schema
-    // and made images an array of strings
     images: [{
-        type: String, // We will store an array of image paths
+        type: String,
     }],
     status: {
         type: String,
-        default: 'OPEN', // Changed default to OPEN for clarity
-        enum: ['OPEN', 'IN PROGRESS', 'RESOLVED'], // Ensures status is one of these values
+        default: 'OPEN',
+        enum: ['OPEN', 'IN PROGRESS', 'RESOLVED'],
     },
 }, { timestamps: true });
 

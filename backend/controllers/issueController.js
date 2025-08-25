@@ -1,7 +1,5 @@
 import IssueModel from '../models/issueModel.js';
-// ❌ REMOVED: Do not import 'upload' middleware here, it's already in the route.
 
-// Controller to CREATE a new issue
 export const createIssueController = async (req, res) => {
     try {
         // From the auth middleware, we get the logged-in user's ID

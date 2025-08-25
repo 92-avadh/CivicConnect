@@ -1,14 +1,17 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { HashRouter as Router } from 'react-router-dom'; // Use HashRouter
+import App from './App';
 import './index.css';
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider } from './context/AuthContext';
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
+const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <AuthProvider>
-      <App />
+      <Router>  {/* ✅ ADD THIS WRAPPER */}
+        <App />
+      </Router> {/* ✅ ADD THIS WRAPPER */}
     </AuthProvider>
   </React.StrictMode>
 );
