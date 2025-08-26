@@ -8,10 +8,14 @@ import {
 const router = express.Router();
 
 // ----------------- Citizen -----------------
-router.post("/register-user", registerUserController);  // Citizen Registration
-router.post("/login-user", loginUserController);        // Citizen Login
+// POST /api/auth/register-user
+router.post("/register-user", registerUserController);
+
+// POST /api/auth/login-user
+router.post("/login-user", loginUserController);
 
 // ----------------- Official -----------------
-router.post("/login-official", loginOfficialController); // Official Login (No registration)
+// POST /api/auth/login-official
+router.post("/login-official", loginOfficialController);
 
 export default router;

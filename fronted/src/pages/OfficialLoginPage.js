@@ -1,186 +1,88 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 
-const OfficialLoginPage = ({
-  formData,
-  handleInputChange,
-  handleRegister,
-  handleTabChange,
-  departmentIdError,
-  resetForm,
-  login,
-}) => {
+const OfficialLoginPage = ({ handleTabChange }) => {
+  const { loginOfficial } = useContext(AuthContext);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [agree, setAgree] = useState(false);
 
-  // ✅ FIXED: Added employeeId to the validation check
-  const isButtonDisabled =
-    !formData.firstName ||
-    !formData.lastName ||
-    !formData.email ||
-    !formData.phone ||
-    !formData.employeeId ||
-    !formData.departmentId ||
-    !formData.password ||
-    !agree ||
-    departmentIdError;
+  const isFormValid = email.includes("@") && password.length > 0;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (isButtonDisabled) {
-      setError("Please fill all fields correctly and agree to the terms.");
+    if (!isFormValid) {
+      setError("Please enter a valid email and password.");
       return;
     }
 
-    const result = await handleRegister(formData, "official");
+    const result = await loginOfficial(email, password);
 
-    if (result.success) {
-      resetForm();
-      handleTabChange("issues");
-    } else {
+    if (result && !result.success) {
       setError(result.message);
     }
   };
 
-  const handleBack = () => {
-    resetForm();
-    handleTabChange("home");
-  };
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-lg">
-        <button
-          onClick={handleBack}
-          className="text-gray-600 mb-4 flex items-center hover:text-gray-800"
-        >
-          ← Back to Home
-        </button>
+      <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
+        
+        <div className="relative text-center mb-6">
+          <button
+            onClick={() => handleTabChange("home")}
+            className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center text-sm font-semibold text-gray-600 hover:text-blue-600 transition-colors"
+          >
+            <ArrowLeft size={18} className="mr-1" />
+            Back 
+          </button>
+          <h2 className="text-3xl font-bold text-gray-800">
+            Login
+          </h2>
+        </div>
 
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Official Login
-        </h2>
-
-        {error && (
-          <div className="bg-red-100 text-red-600 p-3 rounded-lg mb-4 text-sm text-center">
-            {error}
-          </div>
-        )}
+        {error && <p className="text-red-500 text-center mb-3">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="flex space-x-3">
-            <input
-              type="text"
-              placeholder="First Name"
-              name="firstName"
-              value={formData.firstName}
-              onChange={(e) => handleInputChange("firstName", e.target.value)}
-              className="w-1/2 px-4 py-3 border rounded-lg"
-            />
-            <input
-              type="text"
-              placeholder="Last Name"
-              name="lastName"
-              value={formData.lastName}
-              onChange={(e) => handleInputChange("lastName", e.target.value)}
-              className="w-1/2 px-4 py-3 border rounded-lg"
-            />
-          </div>
-
           <input
             type="email"
-            placeholder="Email"
-            name="email"
-            value={formData.email}
-            onChange={(e) => handleInputChange("email", e.target.value)}
+            placeholder="Official Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-3 border rounded-lg"
+            required
           />
-
-          <input
-            type="tel"
-            placeholder="Phone Number"
-            name="phone"
-            value={formData.phone}
-            onChange={(e) => handleInputChange("phone", e.target.value)}
-            className="w-full px-4 py-3 border rounded-lg"
-          />
-
-          {/* ✅ ADDED: The missing Employee ID field */}
-          <input
-            type="text"
-            placeholder="Employee ID"
-            name="employeeId"
-            value={formData.employeeId}
-            onChange={(e) => handleInputChange("employeeId", e.target.value)}
-            className="w-full px-4 py-3 border rounded-lg"
-          />
-
-          <input
-            type="text"
-            placeholder="Department ID (8 digits)"
-            name="departmentId"
-            value={formData.departmentId}
-            onChange={(e) => handleInputChange("departmentId", e.target.value)}
-            className="w-full px-4 py-3 border rounded-lg"
-          />
-          {departmentIdError && <p className="text-red-500 text-sm">{departmentIdError}</p>}
 
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Password"
-              name="password"
-              value={formData.password}
-              onChange={(e) => handleInputChange("password", e.target.value)}
+              value={password}
+              // ✅ THIS IS THE FIX: Corrected the typo from e.gantarget to e.target
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 border rounded-lg pr-12"
+              required
             />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-              <svg
-                onClick={() => setShowPassword(!showPassword)}
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 text-gray-700 cursor-pointer"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                {showPassword ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.543-3.825m7.543-2.43L12 5c4.478 0 8.268 2.943 9.543 7a9.97 9.97 0 01-1.543 3.825m-7.543-2.43a3 3 0 11-4.243-4.243 3 3 0 014.243 4.243z" />
-                )}
-              </svg>
-            </div>
-          </div>
-
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="agreeTerms"
-              checked={agree}
-              onChange={() => setAgree(!agree)}
-              className="mr-2"
-            />
-            <label htmlFor="agreeTerms" className="text-sm text-gray-600">
-              I agree to the{" "}
-              <button
-                type="button"
-                className="text-blue-600 underline"
-                onClick={() => handleTabChange("privacy")}
-              >
-                Terms and Conditions
-              </button>
-            </label>
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-3 text-gray-500"
+            >
+              {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+            </button>
           </div>
 
           <button
             type="submit"
-            disabled={isButtonDisabled}
-            className={`w-full text-white py-3 rounded-lg font-bold transition-colors ${
-              isButtonDisabled
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
+            disabled={!isFormValid}
+            className={`w-full py-3 rounded-lg font-bold transition-colors ${
+              isFormValid
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-gray-400 text-gray-200 cursor-not-allowed"
             }`}
           >
             Login

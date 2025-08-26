@@ -1,27 +1,21 @@
-import express from 'express';
-import multer from 'multer';
-import { createIssueController, getIssuesController } from '../controllers/issueController.js';
-import auth from '../middleware/auth.js'; // ✅ FIXED: Added the missing import for the auth middleware
+import express from "express";
+import {
+  registerUserController,
+  loginUserController,
+  loginOfficialController,
+} from "../controllers/authController.js";
 
 const router = express.Router();
 
-// Configure multer for file uploads
-const upload = multer({
-    limits: { fileSize: 10000000 }, // 10MB limit
-    storage: multer.memoryStorage() // Use memory storage for easy handling
-});
+// ----------------- Citizen -----------------
+// POST /api/auth/register-user
+router.post("/register-user", registerUserController);
 
-// Route for creating a new issue
-// POST /api/issues/create
-router.post(
-    '/create',
-    auth, // This will now work correctly
-    upload.array('images', 5),
-    createIssueController
-);
+// POST /api/auth/login-user
+router.post("/login-user", loginUserController);
 
-// Route for getting all issues
-// GET /api/issues
-router.get('/', getIssuesController);
+// ----------------- Official -----------------
+// POST /api/auth/login-official
+router.post("/login-official", loginOfficialController);
 
 export default router;

@@ -1,19 +1,17 @@
 import IssueModel from '../models/issueModel.js';
 
+// Controller to CREATE a new issue
 export const createIssueController = async (req, res) => {
     try {
-        // From the auth middleware, we get the logged-in user's ID
         const userId = req.user._id;
-
         const { title, description, category } = req.body;
+
         if (!title || !description || !category) {
             return res.status(400).send({ success: false, message: 'Title, description, and category are required.' });
         }
 
-        // Handle file paths for multiple images
         let imagePaths = [];
         if (req.files && req.files.length > 0) {
-            // Assuming your files are served from a public/uploads directory
             imagePaths = req.files.map(file => `/uploads/${file.filename}`);
         }
 
@@ -51,5 +49,41 @@ export const getIssuesController = async (req, res) => {
     } catch (error) {
         console.error("Error fetching issues:", error);
         res.status(500).send({ success: false, message: 'Error fetching issues.' });
+    }
+};
+
+// ✅ THIS IS THE FIX: This function correctly handles the update logic.
+export const updateIssueStatusController = async (req, res) => {
+    try {
+        if (req.user.role !== 'official') {
+            return res.status(403).send({ success: false, message: 'Access denied. Only officials can update status.' });
+        }
+
+        const { id } = req.params;
+        const { status } = req.body;
+
+        if (!status || !['OPEN', 'IN PROGRESS', 'RESOLVED'].includes(status)) {
+            return res.status(400).send({ success: false, message: 'Invalid status provided.' });
+        }
+
+        const updatedIssue = await IssueModel.findByIdAndUpdate(
+            id,
+            { status },
+            { new: true } // Return the updated document
+        );
+
+        if (!updatedIssue) {
+            return res.status(404).send({ success: false, message: 'Issue not found.' });
+        }
+
+        res.status(200).send({
+            success: true,
+            message: 'Issue status updated successfully!',
+            issue: updatedIssue,
+        });
+
+    } catch (error) {
+        console.error("Error updating issue status:", error);
+        res.status(500).send({ success: false, message: 'Server error while updating status.' });
     }
 };
