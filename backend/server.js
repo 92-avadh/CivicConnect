@@ -1,34 +1,62 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import cors from 'cors'; // ✅ 1. Import the cors package
-import connectDB from './config/db.js';
-import authRoutes from './routes/authRoutes.js';
-import issueRoutes from './routes/issueRoutes.js';
+import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import connectDB from './config/db.js';
 
+// 1. Import all your route files
+import authRoutes from './routes/authRoutes.js';
+import issueRoutes from './routes/issueRoutes.js';
+import birthCertificateRoutes from './routes/birthCertificateRoutes.js';
+import deathCertificateRoutes from './routes/deathCertificateRoutes.js';
+import waterConnectionRoutes from './routes/waterConnectionRoutes.js';
 
-
-// Initial setup
+// --- INITIAL SETUP ---
 dotenv.config();
 connectDB();
 const app = express();
 
-// Middleware
-app.use(cors()); // ✅ 2. Use cors middleware - THIS IS THE FIX
+// --- MIDDLEWARE ---
+app.use(cors());
 app.use(express.json());
 
-// These lines are needed to correctly resolve paths in ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Make the 'uploads' folder public
+// --- ROUTES ---
+// Make the 'uploads' folder public so images can be accessed
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// API Routes
-app.use('/api/auth', authRoutes); //
-app.use('/api/issues', issueRoutes); //
+// 2. Connect all the API routes to your application
+app.use('/api/auth', authRoutes);
+app.use('/api/issues', issueRoutes);
+app.use('/api/birth-certificates', birthCertificateRoutes);
+app.use('/api/death-certificates', deathCertificateRoutes);
+app.use('/api/water-connections', waterConnectionRoutes);
 
-// Server listener
+// --- PRODUCTION BUILD & ERROR HANDLING ---
+if (process.env.NODE_ENV === 'production') {
+  const frontendBuildPath = path.join(__dirname, '../frontend/build');
+  app.use(express.static(frontendBuildPath));
+  app.get('*', (req, res) =>
+    res.sendFile(path.resolve(__dirname, '../frontend/build', 'index.html'))
+  );
+} else {
+  app.get('/', (req, res) => {
+    res.send('API is running in development mode...');
+  });
+}
+
+app.use((err, req, res, next) => {
+  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  res.status(statusCode);
+  res.json({
+    message: err.message,
+    stack: process.env.NODE_ENV === 'production' ? '🥞' : err.stack,
+  });
+});
+
+// --- SERVER LISTENER ---
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
