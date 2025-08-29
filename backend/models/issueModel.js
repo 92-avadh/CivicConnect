@@ -9,22 +9,28 @@ const issueSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true,
+        trim: true,
     },
     description: {
         type: String,
         required: true,
+        trim: true,
     },
     category: {
         type: String,
         required: true,
+        trim: true,
     },
-    images: [{
-        type: String,
-    }],
+    images: [
+        {
+            type: String,
+            trim: true,
+        }
+    ],
     status: {
         type: String,
+        enum: ['OPEN', 'IN_PROGRESS', 'RESOLVED'], // ✅ consistent uppercase + underscore
         default: 'OPEN',
-        enum: ['OPEN', 'IN PROGRESS', 'RESOLVED'],
     },
 }, { timestamps: true });
 

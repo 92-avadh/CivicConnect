@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import axios from "axios";
 import { AuthContext } from "./context/AuthContext";
 
@@ -20,11 +20,12 @@ import { TrackApplicationPage } from "./pages/TrackApplicationPage.js";
 import { BirthCertificatePage } from "./pages/BirthCertificatePage.js";
 import { DeathCertificatePage } from "./pages/DeathCertificatePage.js";
 import { WaterConnectionPage } from "./pages/WaterConnectionPage.js";
-import { ForgotPasswordPage } from "./pages/ForgotPasswordPage.js";
 import { AdminDashboardPage } from "./pages/AdminDashboardPage.js";
 import { PropertyTaxPage } from "./pages/PropertyTaxPage";
+import { GrievancePage } from "./pages/GrievancePage.js";
+import { TermsOfServicePage } from "./pages/TermsOfServicePage.js";
 
-// Import Components
+// Components
 import { NavBar } from "./components/NavBar.js";
 import { Footer } from "./components/Footer.js";
 
@@ -38,27 +39,32 @@ function App() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const fetchIssues = async () => {
+  const fetchIssues = useCallback(async () => {
+    if (!user) return;
+
     try {
       setIssuesState({ loading: true, error: null });
-      const res = await axios.get("http://localhost:5000/api/issues");
+      const token = sessionStorage.getItem("authToken");
+      const config = { headers: { "x-auth-token": token } };
       
-      // ✅ THIS IS THE FIX: Check if the fetched issues array is empty
+      const endpoint = user.role === 'official'
+        ? "http://localhost:5000/api/issues"
+        : "http://localhost:5000/api/issues/my-issues";
+
+      const res = await axios.get(endpoint, config);
+
       if (res.data.issues && res.data.issues.length > 0) {
         setIssues(res.data.issues);
         setIssuesState({ loading: false, error: null });
       } else {
-        // If no issues are returned, set the specific message
         setIssues([]);
-        setIssuesState({ loading: false, error: "You haven't reported any issues yet." });
+        setIssuesState({ loading: false, error: "No issues found." });
       }
-
     } catch (error) {
       console.error("Failed to fetch issues:", error);
-      // This message will now only show for actual network/server errors
       setIssuesState({ loading: false, error: "Could not load issues." });
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -71,18 +77,22 @@ function App() {
     return () => {
       window.removeEventListener("hashchange", handleHashChange);
     };
-  }, [user]);
+  }, [user, fetchIssues]);
 
   const handleTabChange = (tab) => {
     window.location.hash = tab;
     setIsMenuOpen(false);
     window.scrollTo(0, 0);
   };
-  
+
   const handleUpdateStatus = async (issueId, newStatus) => {
     const result = await updateIssueStatus(issueId, newStatus);
     if (result.success) {
-      fetchIssues(); 
+      setIssues((prevIssues) =>
+        prevIssues.map((issue) =>
+          issue._id === issueId ? { ...issue, status: newStatus } : issue
+        )
+      );
     } else {
       alert(`Error: ${result.message}`);
     }
@@ -113,9 +123,21 @@ function App() {
       case "report":
         return <ReportPage handleTabChange={handleTabChange} fetchIssues={fetchIssues} />;
       case "issues":
-        return <IssuesPage issues={issues} loggedIn={!!user} currentUser={user} issuesState={issuesState} handleUpdateStatus={handleUpdateStatus} />;
+        return (
+          <IssuesPage
+            issues={issues}
+            loggedIn={!!user}
+            currentUser={user}
+            issuesState={issuesState}
+            handleUpdateStatus={handleUpdateStatus}
+          />
+        );
       case "profile":
-        return user ? <ProfilePage currentUser={user} issues={issues} handleLogout={handleLogout} /> : <CitizenLoginPage handleTabChange={handleTabChange} />;
+        return user ? (
+          <ProfilePage currentUser={user} issues={issues} handleLogout={handleLogout} />
+        ) : (
+          <CitizenLoginPage handleTabChange={handleTabChange} />
+        );
       case "about":
         return <AboutPage />;
       case "contact":
@@ -136,37 +158,41 @@ function App() {
         return <DeathCertificatePage handleTabChange={handleTabChange} />;
       case "water-connection":
         return <WaterConnectionPage handleTabChange={handleTabChange} />;
-      case "forgot-password":
-        return <ForgotPasswordPage handleTabChange={handleTabChange} />;
       case "dashboard":
         return user?.role === "official" ? <AdminDashboardPage /> : <HomePage handleTabChange={handleTabChange} />;
       case "property-tax":
         return <PropertyTaxPage handleTabChange={handleTabChange} />;
+      case "grievance":
+        return <GrievancePage handleTabChange={handleTabChange} fetchIssues={fetchIssues} />;
+      case "terms":
+        return <TermsOfServicePage />;
       default:
         return <HomePage handleTabChange={handleTabChange} />;
     }
   };
 
   return (
-      <div className="min-h-screen bg-gray-100 text-gray-800">
-        <NavBar
-          loggedIn={!!user}
-          handleTabChange={handleTabChange}
-          handleReportClick={() => user ? handleTabChange("report") : handleTabChange("citizen-login")}
-          notifications={notifications}
-          showNotifications={showNotifications}
-          setShowNotifications={setShowNotifications}
-          isMenuOpen={isMenuOpen}
-          setIsMenuOpen={setIsMenuOpen}
-          handleLogout={handleLogout}
-          markNotificationsAsRead={markNotificationsAsRead}
-          currentUser={user}
-        />
-        <main>
-          <div key={currentPage} className="page-container">{renderPage()}</div>
-        </main>
-        <Footer handleTabChange={handleTabChange} />
-      </div>
+    <div className="min-h-screen bg-gray-100 text-gray-800">
+      <NavBar
+        loggedIn={!!user}
+        handleTabChange={handleTabChange}
+        handleReportClick={() => (user ? handleTabChange("report") : handleTabChange("citizen-login"))}
+        notifications={notifications}
+        showNotifications={showNotifications}
+        setShowNotifications={setShowNotifications}
+        isMenuOpen={isMenuOpen}
+        setIsMenuOpen={setIsMenuOpen}
+        handleLogout={handleLogout}
+        markNotificationsAsRead={markNotificationsAsRead}
+        currentUser={user}
+      />
+      <main>
+        <div key={currentPage} className="page-container">
+          {renderPage()}
+        </div>
+      </main>
+      <Footer handleTabChange={handleTabChange} />
+    </div>
   );
 }
 

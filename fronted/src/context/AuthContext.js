@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }) => {
         }
     }, []);
 
+    // Citizen login
     const login = async (email, password) => {
         try {
             const res = await axios.post(`${API_URL}/auth/login-user`, { email, password });
@@ -34,6 +35,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
     
+    // Official login
     const loginOfficial = async (email, password) => {
         try {
             const res = await axios.post(`${API_URL}/auth/login-official`, { email, password });
@@ -52,6 +54,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // Register (Citizen / Official)
     const register = async (formData, userType) => {
         try {
             const endpoint = userType === 'official' ? '/auth/register-official' : '/auth/register-user';
@@ -62,6 +65,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // Report an Issue
     const reportIssue = async (reportData) => {
         try {
             const token = sessionStorage.getItem('authToken');
@@ -75,7 +79,6 @@ export const AuthProvider = ({ children }) => {
                 formData.append('images', imageFile);
             });
 
-            // ✅ FIX APPLIED: 'Content-Type' header is removed to let axios handle it.
             const res = await axios.post(`${API_URL}/issues/create`, formData, {
                 headers: { 'x-auth-token': token }
             });
@@ -86,6 +89,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
     
+    // ✅ FIXED: Update Issue Status (correct endpoint)
     const updateIssueStatus = async (issueId, status) => {
         try {
             const token = sessionStorage.getItem('authToken');
@@ -93,11 +97,11 @@ export const AuthProvider = ({ children }) => {
                 return { success: false, message: "Authentication token not found." };
             }
 
-            const res = await axios.put(`${API_URL}/issues/update-status/${issueId}`, { status }, {
-                headers: {
-                    'x-auth-token': token
-                }
-            });
+            const res = await axios.put(
+                `${API_URL}/issues/update-status/${issueId}`,   // ✅ EDITED LINE
+                { status },
+                { headers: { 'x-auth-token': token } }
+            );
 
             return res.data; 
         } catch (error) {
@@ -105,6 +109,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // Logout
     const logout = () => {
         setUser(null);
         sessionStorage.removeItem('authToken');

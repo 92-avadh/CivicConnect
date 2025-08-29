@@ -1,16 +1,15 @@
 import React, { useContext } from 'react';
-import { AuthContext } from '../context/AuthContext'; // Import the context
+import { AuthContext } from '../context/AuthContext';
 import { Monuments } from '../components/Monuments';
 import { KeyOfficials } from '../components/KeyOfficials';
-
-// --- Data (Moved outside the component for better organization) ---
 
 const quickLinksData = [
     { name: 'Pay Property Tax', icon: '🏠', tab: 'property-tax' },
     { name: 'Birth Certificate', icon: '👶', tab: 'birth-certificate' },
     { name: 'Death Certificate', icon: '🕊️', tab: 'death-certificate' },
     { name: 'Water Connection', icon: '💧', tab: 'water-connection' },
-    { name: 'File a Grievance', icon: '✍️', isReport: true },
+    // ✅ FIX: Changed name and tab to 'feedback'
+    { name: 'Write Feedback', icon: '✍️', tab: 'feedback' }, 
     { name: 'Track Application', icon: '🔍', tab: 'track' },
 ];
 
@@ -20,8 +19,7 @@ const newsUpdatesData = [
     { date: 'July 20, 2025', title: 'Property tax deadline extended to August 31st.' },
 ];
 
-// --- Sub-Components (Breaking the UI into smaller pieces) ---
-
+// --- Sub-Components ---
 const HeroSection = () => (
     <div className="relative bg-white">
         <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
@@ -37,14 +35,14 @@ const HeroSection = () => (
     </div>
 );
 
-const QuickLinksSection = ({ handleTabChange, handleReportClick }) => (
+const QuickLinksSection = ({ handleTabChange }) => (
     <div className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-2xl font-semibold text-gray-800 text-center mb-8">Quick Links</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-center">
                 {quickLinksData.map(link => (
                     <a key={link.name} 
-                       onClick={link.isReport ? handleReportClick : () => handleTabChange(link.tab)} 
+                       onClick={() => handleTabChange(link.tab)} 
                        className="p-4 bg-gray-100 rounded-lg hover:bg-blue-100 hover:shadow-md cursor-pointer transition">
                         <div className="text-3xl mb-2">{link.icon}</div>
                         <p className="text-sm font-medium text-gray-700">{link.name}</p>
@@ -95,7 +93,6 @@ const NewsAndLearningSection = ({ handleTabChange }) => (
         </div>
     </div>
 );
-
 const RoleSelectionSection = ({ handleTabChange }) => (
     <div id="role-selection-section" className="py-12 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -119,22 +116,15 @@ const RoleSelectionSection = ({ handleTabChange }) => (
     </div>
 );
 
-
 // --- Main HomePage Component ---
-
-export const HomePage = ({ handleTabChange, handleReportClick }) => {
-    // Get the user status directly from the context
+export const HomePage = ({ handleTabChange }) => {
     const { user } = useContext(AuthContext);
-
     return (
       <div className="bg-gray-50">
         <HeroSection />
-        <QuickLinksSection handleTabChange={handleTabChange} handleReportClick={handleReportClick} />
+        <QuickLinksSection handleTabChange={handleTabChange} />
         <NewsAndLearningSection handleTabChange={handleTabChange} />
-        
-        {/* Conditionally render the RoleSelectionSection only if the user is logged out */}
         {!user && <RoleSelectionSection handleTabChange={handleTabChange} />}
-        
         <Monuments />
         <KeyOfficials />
       </div>

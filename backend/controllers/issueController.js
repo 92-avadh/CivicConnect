@@ -12,7 +12,15 @@ export const createIssueController = async (req, res) => {
 
         const imagePaths = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
 
-        const newIssue = new IssueModel({ userId, title, description, category, images: imagePaths });
+        const newIssue = new IssueModel({ 
+            userId, 
+            title, 
+            description, 
+            category, 
+            images: imagePaths,
+            status: "OPEN"
+        });
+
         await newIssue.save();
 
         res.status(201).send({
@@ -29,7 +37,6 @@ export const createIssueController = async (req, res) => {
 // Controller to GET ALL issues (for officials only)
 export const getIssuesController = async (req, res) => {
     try {
-        // Role check to ensure only officials can access all issues
         if (req.user.role !== 'official') {
             return res.status(403).send({ 
                 success: false, 
@@ -43,7 +50,7 @@ export const getIssuesController = async (req, res) => {
         const totalIssues = await IssueModel.countDocuments({});
 
         const issues = await IssueModel.find({})
-            .populate('userId', 'name email') // Gets reporter's name and email
+            .populate('userId', 'name email')
             .sort({ createdAt: -1 })
             .limit(limit)
             .skip(skip);
@@ -62,7 +69,7 @@ export const getIssuesController = async (req, res) => {
     }
 };
 
-// Controller to GET issues for the logged-in user (for Profile Page)
+// Controller to GET issues for the logged-in user
 export const getUserIssuesController = async (req, res) => {
     try {
         const issues = await IssueModel.find({ userId: req.user._id }).sort({ createdAt: -1 });
@@ -83,15 +90,22 @@ export const updateIssueStatusController = async (req, res) => {
         if (req.user.role !== 'official') {
             return res.status(403).send({ success: false, message: 'Access denied.' });
         }
+
         const { id } = req.params;
         const { status } = req.body;
-        if (!status || !['OPEN', 'IN PROGRESS', 'RESOLVED'].includes(status)) {
+
+        const validStatuses = ['OPEN', 'IN_PROGRESS', 'RESOLVED'];
+
+        if (!status || !validStatuses.includes(status)) {
             return res.status(400).send({ success: false, message: 'Invalid status.' });
         }
+
         const updatedIssue = await IssueModel.findByIdAndUpdate(id, { status }, { new: true });
+
         if (!updatedIssue) {
             return res.status(404).send({ success: false, message: 'Issue not found.' });
         }
+
         res.status(200).send({
             success: true,
             message: 'Issue status updated successfully!',
