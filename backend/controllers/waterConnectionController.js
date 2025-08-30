@@ -1,7 +1,5 @@
 import WaterConnectionModel from '../models/waterConnectionModel.js';
 
-// --- For Citizens ---
-
 export const applyForWaterConnection = async (req, res) => {
     try {
         const applicationData = { ...req.body, applicantId: req.user._id };
@@ -10,9 +8,10 @@ export const applyForWaterConnection = async (req, res) => {
         }
         const newApplication = new WaterConnectionModel(applicationData);
         await newApplication.save();
+        
         res.status(201).send({
             success: true,
-            message: 'Application submitted successfully!',
+            message: `Application submitted successfully! Your Application ID is: ${newApplication.applicationNumber}`,
             applicationNumber: newApplication.applicationNumber
         });
     } catch (error) {
@@ -31,15 +30,13 @@ export const getUserWaterConnections = async (req, res) => {
     }
 };
 
-// --- For Officials ---
-
 export const getAllWaterConnections = async (req, res) => {
     try {
         if (req.user.role !== 'official') {
             return res.status(403).send({ success: false, message: 'Access Denied.' });
         }
         const applications = await WaterConnectionModel.find({})
-            .populate('applicantId', 'firstName lastName email') // Fetches the full name
+            .populate('applicantId', 'firstName lastName email')
             .sort({ createdAt: -1 });
         res.status(200).send({ success: true, applications });
     } catch (error) {
@@ -62,3 +59,4 @@ export const updateWaterConnectionStatus = async (req, res) => {
         res.status(500).send({ success: false, message: 'Server error.' });
     }
 };
+

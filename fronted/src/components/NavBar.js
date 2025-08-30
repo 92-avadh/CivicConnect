@@ -5,11 +5,10 @@ export const NavBar = ({ loggedIn, currentUser, handleTabChange, handleLogout, i
     
     const isOfficial = loggedIn && currentUser?.role === 'official';
 
-    // ✅ THIS IS THE FIX: Added 'Report an Issue' to the links for logged-out users
     const loggedOutLinks = [
         { name: 'Home', tab: 'home' },
         { name: 'View Issues', tab: 'issues' },
-        { name: 'Report an Issue', tab: 'report' }, // This is now visible to everyone
+        { name: 'Report an Issue', tab: 'report' },
         { name: 'About', tab: 'about' },
         { name: 'Contact', tab: 'contact' }
     ];
@@ -23,16 +22,18 @@ export const NavBar = ({ loggedIn, currentUser, handleTabChange, handleLogout, i
     const officialLinks = [
         { name: 'Dashboard', tab: 'dashboard' },
         { name: 'All Issues', tab: 'issues' },
+        // ADDED: New link for officials
+        { name: 'View Feedback', tab: 'view-feedback' },
     ];
 
     const navLinks = loggedIn ? (isOfficial ? officialLinks : citizenLinks) : loggedOutLinks;
     
-    // ✅ THIS IS THE FIX: This function handles the logic for the "Report an Issue" button
     const handleReportClick = () => {
         if (loggedIn) {
             handleTabChange('report');
         } else {
-            alert("Please log in to report an issue.");
+            // Replaced alert with console.log for a better user experience
+            console.log("User not logged in, redirecting to login.");
             handleTabChange('citizen-login');
         }
     };
@@ -51,7 +52,6 @@ export const NavBar = ({ loggedIn, currentUser, handleTabChange, handleLogout, i
                       <button 
                         key={link.tab} 
                         type="button"
-                        // Use the special handler for the 'report' tab
                         onClick={() => link.tab === 'report' ? handleReportClick() : handleTabChange(link.tab)} 
                         className="text-gray-600 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium cursor-pointer bg-transparent border-none"
                       >

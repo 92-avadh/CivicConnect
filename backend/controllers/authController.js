@@ -58,8 +58,9 @@ export const loginUserController = async (req, res) => {
         if (!match) {
             return res.status(400).send({ success: false, message: 'Invalid password' });
         }
-
-        const token = jwt.sign({ _id: account._id, role: 'user' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        
+        // EDITED LINE: Replaced process.env.JWT_SECRET with the actual string
+        const token = jwt.sign({ _id: account._id, role: 'user' }, 'a9b8c7d6e5f4g3h2j1k0l9m8n7b6v5c4x3z2q1w2e3r4t5y6u7i8o9p0', { expiresIn: '7d' });
 
         res.status(200).send({
             success: true,
@@ -99,7 +100,8 @@ export const loginOfficialController = async (req, res) => {
             return res.status(400).send({ success: false, message: 'Invalid password' });
         }
 
-        const token = jwt.sign({ _id: official._id, role: 'official' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        // EDITED LINE: Replaced process.env.JWT_SECRET with the actual string
+        const token = jwt.sign({ _id: official._id, role: 'official' }, 'a9b8c7d6e5f4g3h2j1k0l9m8n7b6v5c4x3z2q1w2e3r4t5y6u7i8o9p0', { expiresIn: '7d' });
 
         res.status(200).send({
             success: true,

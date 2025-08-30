@@ -1,19 +1,14 @@
 import DeathCertificateModel from '../models/deathCertificateModel.js';
 
-// --- For Citizens ---
-
-// @desc    Apply for a new Death Certificate
-// @route   POST /api/death-certificates/apply
 export const applyForDeathCertificate = async (req, res) => {
     try {
         const applicationData = { ...req.body, applicantId: req.user._id };
         const newApplication = new DeathCertificateModel(applicationData);
         await newApplication.save();
 
-        // This response ensures the frontend receives the success message and application number
         res.status(201).send({
             success: true,
-            message: 'Application submitted successfully!',
+            message: `Application submitted successfully! Your Application ID is: ${newApplication.applicationNumber}`,
             applicationNumber: newApplication.applicationNumber
         });
     } catch (error) {
@@ -22,8 +17,6 @@ export const applyForDeathCertificate = async (req, res) => {
     }
 };
 
-// @desc    Get all of the user's death certificate applications
-// @route   GET /api/death-certificates/my-applications
 export const getUserDeathCertificates = async (req, res) => {
     try {
         const applications = await DeathCertificateModel.find({ applicantId: req.user._id }).sort({ createdAt: -1 });
@@ -34,9 +27,6 @@ export const getUserDeathCertificates = async (req, res) => {
     }
 };
 
-// --- For Officials ---
-
-// @desc    Get all death certificate applications (officials only)
 export const getAllDeathCertificates = async (req, res) => {
     try {
         if (req.user.role !== 'official') {
@@ -49,7 +39,6 @@ export const getAllDeathCertificates = async (req, res) => {
     }
 };
 
-// @desc    Update a death certificate application status (officials only)
 export const updateDeathCertificateStatus = async (req, res) => {
     try {
         if (req.user.role !== 'official') {
@@ -65,3 +54,4 @@ export const updateDeathCertificateStatus = async (req, res) => {
         res.status(500).send({ success: false, message: 'Server error.' });
     }
 };
+

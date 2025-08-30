@@ -22,8 +22,9 @@ import { DeathCertificatePage } from "./pages/DeathCertificatePage.js";
 import { WaterConnectionPage } from "./pages/WaterConnectionPage.js";
 import { AdminDashboardPage } from "./pages/AdminDashboardPage.js";
 import { PropertyTaxPage } from "./pages/PropertyTaxPage";
-import { GrievancePage } from "./pages/GrievancePage.js";
 import { TermsOfServicePage } from "./pages/TermsOfServicePage.js";
+import { FeedbackPage } from "./pages/FeedbackPage.js"; 
+import { ViewFeedbackPage } from "./pages/ViewFeedbackPage.js"; // IMPORT THE NEW PAGE
 
 // Components
 import { NavBar } from "./components/NavBar.js";
@@ -35,9 +36,13 @@ function App() {
   const [currentPage, setCurrentPage] = useState(window.location.hash.substring(1) || "home");
   const [issues, setIssues] = useState([]);
   const [issuesState, setIssuesState] = useState({ loading: true, error: null });
-  const [notifications, setNotifications] = useState([]);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
 
   const fetchIssues = useCallback(async () => {
     if (!user) return;
@@ -69,8 +74,10 @@ function App() {
   useEffect(() => {
     const handleHashChange = () => {
       setCurrentPage(window.location.hash.substring(1) || "home");
+      window.scrollTo(0, 0); 
     };
     window.addEventListener("hashchange", handleHashChange);
+    window.scrollTo(0, 0);
     if (user) {
       fetchIssues();
     }
@@ -102,11 +109,6 @@ function App() {
     logout();
     setIssues([]);
     handleTabChange("home");
-  };
-
-  const markNotificationsAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    setShowNotifications(false);
   };
 
   const renderPage = () => {
@@ -162,10 +164,13 @@ function App() {
         return user?.role === "official" ? <AdminDashboardPage /> : <HomePage handleTabChange={handleTabChange} />;
       case "property-tax":
         return <PropertyTaxPage handleTabChange={handleTabChange} />;
-      case "grievance":
-        return <GrievancePage handleTabChange={handleTabChange} fetchIssues={fetchIssues} />;
       case "terms":
         return <TermsOfServicePage />;
+      case "feedback":
+        return <FeedbackPage />;
+      // ADD THE CASE FOR THE NEW ROUTE
+      case "view-feedback":
+        return <ViewFeedbackPage />;
       default:
         return <HomePage handleTabChange={handleTabChange} />;
     }
@@ -176,14 +181,9 @@ function App() {
       <NavBar
         loggedIn={!!user}
         handleTabChange={handleTabChange}
-        handleReportClick={() => (user ? handleTabChange("report") : handleTabChange("citizen-login"))}
-        notifications={notifications}
-        showNotifications={showNotifications}
-        setShowNotifications={setShowNotifications}
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
         handleLogout={handleLogout}
-        markNotificationsAsRead={markNotificationsAsRead}
         currentUser={user}
       />
       <main>
@@ -191,7 +191,10 @@ function App() {
           {renderPage()}
         </div>
       </main>
-      <Footer handleTabChange={handleTabChange} />
+      <Footer 
+        handleTabChange={handleTabChange} 
+        handleReportClick={() => (user ? handleTabChange("report") : handleTabChange("citizen-login"))}
+      />
     </div>
   );
 }

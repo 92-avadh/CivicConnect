@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
+import axios from 'axios'; // Import axios
 
 export const TrackApplicationPage = () => {
     const [trackingId, setTrackingId] = useState('');
-    const [issue, setIssue] = useState(null);
+    const [application, setApplication] = useState(null); // Renamed for clarity
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const handleTrack = (e) => {
+    const handleTrack = async (e) => {
         e.preventDefault();
         if (!trackingId) {
             setError('Please enter an Application ID.');
@@ -14,21 +15,33 @@ export const TrackApplicationPage = () => {
         }
         setLoading(true);
         setError('');
-        setIssue(null);
+        setApplication(null);
 
-        // Simulate API call
-        setTimeout(() => {
-            if (trackingId === 'SMC-123456') {
-                setIssue({
-                    title: 'Pothole on Ring Road',
-                    status: 'Open',
-                    createdAt: new Date().toISOString()
-                });
-            } else {
-                setError('Application number not found.');
+        try {
+            // Real API call to the new tracking endpoint
+            const res = await axios.get(`http://localhost:5000/api/track/${trackingId}`);
+
+            if (res.data.success) {
+                setApplication(res.data.application);
             }
+        } catch (err) {
+            if (err.response && err.response.status === 404) {
+                setError('Application number not found.');
+            } else {
+                setError('An error occurred. Please try again.');
+            }
+            console.error("Tracking error:", err);
+        } finally {
             setLoading(false);
-        }, 1000);
+        }
+    };
+
+    const getStatusClass = (status) => {
+        const lowerStatus = status?.toLowerCase() || '';
+        if (lowerStatus.includes('open')) return 'bg-red-100 text-red-800';
+        if (lowerStatus.includes('progress')) return 'bg-yellow-100 text-yellow-800';
+        if (lowerStatus.includes('resolved') || lowerStatus.includes('approved')) return 'bg-green-100 text-green-800';
+        return 'bg-gray-100 text-gray-800';
     };
 
     return (
@@ -45,7 +58,7 @@ export const TrackApplicationPage = () => {
                                 id="trackingId"
                                 value={trackingId}
                                 onChange={(e) => setTrackingId(e.target.value)}
-                                placeholder="Enter your Application ID (e.g., SMC-123456)"
+                                placeholder="Enter your Application ID"
                                 className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
@@ -54,13 +67,13 @@ export const TrackApplicationPage = () => {
                         </button>
                     </form>
                     {error && <p className="mt-4 text-center text-red-500">{error}</p>}
-                    {issue && (
+                    {application && (
                         <div className="mt-6 border-t pt-6">
                             <h3 className="text-lg font-semibold text-gray-900">Application Status</h3>
                             <div className="mt-4 space-y-2">
-                                <div className="flex justify-between"><span>Title:</span> <span className="font-medium">{issue.title}</span></div>
-                                <div className="flex justify-between"><span>Status:</span> <span className={`font-medium px-2 py-1 rounded-full text-xs ${issue.status === 'Open' ? 'bg-red-100 text-red-800' : issue.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>{issue.status}</span></div>
-                                <div className="flex justify-between"><span>Reported On:</span> <span>{new Date(issue.createdAt).toLocaleDateString()}</span></div>
+                                <div className="flex justify-between"><span>Title:</span> <span className="font-medium">{application.title}</span></div>
+                                <div className="flex justify-between"><span>Status:</span> <span className={`font-medium px-2 py-1 rounded-full text-xs ${getStatusClass(application.status)}`}>{application.status}</span></div>
+                                <div className="flex justify-between"><span>Submitted On:</span> <span>{new Date(application.createdAt).toLocaleDateString()}</span></div>
                             </div>
                         </div>
                     )}

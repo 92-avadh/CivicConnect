@@ -1,9 +1,5 @@
 import BirthCertificateModel from '../models/birthCertificateModel.js';
 
-// --- For Citizens ---
-
-// @desc    Apply for a new Birth Certificate
-// @route   POST /api/birth-certificates/apply
 export const applyForBirthCertificate = async (req, res) => {
     try {
         const applicationData = { ...req.body, applicantId: req.user._id };
@@ -12,7 +8,7 @@ export const applyForBirthCertificate = async (req, res) => {
 
         res.status(201).send({
             success: true,
-            message: 'Application submitted successfully!',
+            message: `Application submitted successfully! Your Application ID is: ${newApplication.applicationNumber}`,
             applicationNumber: newApplication.applicationNumber
         });
     } catch (error) {
@@ -21,7 +17,6 @@ export const applyForBirthCertificate = async (req, res) => {
     }
 };
 
-// @desc    Get all of the user's birth certificate applications
 export const getUserBirthCertificates = async (req, res) => {
     try {
         const applications = await BirthCertificateModel.find({ applicantId: req.user._id }).sort({ createdAt: -1 });
@@ -32,9 +27,6 @@ export const getUserBirthCertificates = async (req, res) => {
     }
 };
 
-// --- For Officials ---
-
-// @desc    Get all birth certificate applications (officials only)
 export const getAllBirthCertificates = async (req, res) => {
     try {
         if (req.user.role !== 'official') {
@@ -47,7 +39,6 @@ export const getAllBirthCertificates = async (req, res) => {
     }
 };
 
-// @desc    Update a birth certificate application status (officials only)
 export const updateBirthCertificateStatus = async (req, res) => {
     try {
         if (req.user.role !== 'official') {
@@ -63,3 +54,4 @@ export const updateBirthCertificateStatus = async (req, res) => {
         res.status(500).send({ success: false, message: 'Server error.' });
     }
 };
+

@@ -11,6 +11,8 @@ import issueRoutes from './routes/issueRoutes.js';
 import birthCertificateRoutes from './routes/birthCertificateRoutes.js';
 import deathCertificateRoutes from './routes/deathCertificateRoutes.js';
 import waterConnectionRoutes from './routes/waterConnectionRoutes.js';
+import trackRoutes from './routes/trackRoutes.js';
+import feedbackRoutes from './routes/feedbackRoutes.js'; // Added new feedback route
 
 // --- INITIAL SETUP ---
 dotenv.config();
@@ -34,6 +36,8 @@ app.use('/api/issues', issueRoutes);
 app.use('/api/birth-certificates', birthCertificateRoutes);
 app.use('/api/death-certificates', deathCertificateRoutes);
 app.use('/api/water-connections', waterConnectionRoutes);
+app.use('/api/track', trackRoutes);
+app.use('/api/feedback', feedbackRoutes); // Added new feedback route
 
 // --- PRODUCTION BUILD & ERROR HANDLING ---
 if (process.env.NODE_ENV === 'production') {
