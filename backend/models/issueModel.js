@@ -6,7 +6,7 @@ const issueSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
-    title: {
+    location: { // Changed from 'title' to 'location'
         type: String,
         required: true,
         trim: true,
@@ -29,7 +29,7 @@ const issueSchema = new mongoose.Schema({
     ],
     status: {
         type: String,
-        enum: ['OPEN', 'IN_PROGRESS', 'RESOLVED'], // ✅ consistent uppercase + underscore
+        enum: ['OPEN', 'IN_PROGRESS', 'RESOLVED'],
         default: 'OPEN',
     },
 }, { timestamps: true });

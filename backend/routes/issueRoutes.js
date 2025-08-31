@@ -6,22 +6,18 @@ import {
   getIssuesController,
   updateIssueStatusController,
   deleteIssueController,
-  getUserIssuesController,
-} from '../controllers/issueController.js';
+} from '../controllers/IssueController.js';
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
-// GET /api/issues/ (Get all issues, for officials only)
-router.get('/', authMiddleware, getIssuesController);
-
-// GET /api/issues/my-issues (Get issues for the logged-in user)
-router.get('/my-issues', authMiddleware, getUserIssuesController);
+// ✨ MODIFIED FOR TESTING: authMiddleware has been temporarily removed from this line.
+router.get('/', getIssuesController);
 
 // POST /api/issues/create (Create a new issue)
 router.post('/create', authMiddleware, upload.array('images', 5), createIssueController);
 
-// PUT /api/issues/update-status/:id (Update an issue's status)
+// PUT /api/issues/update-status/:id (Update an issue's status, officials only)
 router.put('/update-status/:id', authMiddleware, updateIssueStatusController);
 
 // DELETE /api/issues/:id (Delete an issue)

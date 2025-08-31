@@ -23,15 +23,15 @@ import { WaterConnectionPage } from "./pages/WaterConnectionPage.js";
 import { AdminDashboardPage } from "./pages/AdminDashboardPage.js";
 import { PropertyTaxPage } from "./pages/PropertyTaxPage";
 import { TermsOfServicePage } from "./pages/TermsOfServicePage.js";
-import { FeedbackPage } from "./pages/FeedbackPage.js"; 
-import { ViewFeedbackPage } from "./pages/ViewFeedbackPage.js"; // IMPORT THE NEW PAGE
+import { FeedbackPage } from "./pages/FeedbackPage.js";
+import { ViewFeedbackPage } from "./pages/ViewFeedbackPage.js";
 
 // Components
 import { NavBar } from "./components/NavBar.js";
 import { Footer } from "./components/Footer.js";
 
 function App() {
-  const { user, logout, updateIssueStatus } = useContext(AuthContext);
+  const { user, logout, updateIssueStatus, deleteIssue } = useContext(AuthContext);
 
   const [currentPage, setCurrentPage] = useState(window.location.hash.substring(1) || "home");
   const [issues, setIssues] = useState([]);
@@ -44,6 +44,14 @@ function App() {
     }
   }, []);
 
+  const getApiUrl = () => {
+    const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    if (isLocal) {
+      return "http://localhost:5000/api";
+    }
+    return "http://192.168.1.4:5000/api";
+  };
+
   const fetchIssues = useCallback(async () => {
     if (!user) return;
 
@@ -51,22 +59,16 @@ function App() {
       setIssuesState({ loading: true, error: null });
       const token = sessionStorage.getItem("authToken");
       const config = { headers: { "x-auth-token": token } };
-      
-      const endpoint = user.role === 'official'
-        ? "http://localhost:5000/api/issues"
-        : "http://localhost:5000/api/issues/my-issues";
+      const endpoint = `${getApiUrl()}/issues`;
 
       const res = await axios.get(endpoint, config);
+      
+      setIssues(res.data.issues || []);
+      setIssuesState({ loading: false, error: null });
 
-      if (res.data.issues && res.data.issues.length > 0) {
-        setIssues(res.data.issues);
-        setIssuesState({ loading: false, error: null });
-      } else {
-        setIssues([]);
-        setIssuesState({ loading: false, error: "No issues found." });
-      }
     } catch (error) {
       console.error("Failed to fetch issues:", error);
+      setIssues([]);
       setIssuesState({ loading: false, error: "Could not load issues." });
     }
   }, [user]);
@@ -74,7 +76,7 @@ function App() {
   useEffect(() => {
     const handleHashChange = () => {
       setCurrentPage(window.location.hash.substring(1) || "home");
-      window.scrollTo(0, 0); 
+      window.scrollTo(0, 0);
     };
     window.addEventListener("hashchange", handleHashChange);
     window.scrollTo(0, 0);
@@ -105,6 +107,17 @@ function App() {
     }
   };
 
+  const handleDeleteIssue = async (issueId) => {
+    if (window.confirm("Are you sure you want to delete this issue?")) {
+      const result = await deleteIssue(issueId);
+      if (result.success) {
+        setIssues((prevIssues) => prevIssues.filter((issue) => issue._id !== issueId));
+      } else {
+        alert(`Error: ${result.message}`);
+      }
+    }
+  };
+
   const handleLogout = () => {
     logout();
     setIssues([]);
@@ -123,7 +136,7 @@ function App() {
       case "official-login":
         return <OfficialLoginPage handleTabChange={handleTabChange} />;
       case "report":
-        return <ReportPage handleTabChange={handleTabChange} fetchIssues={fetchIssues} />;
+        return user ? <ReportPage handleTabChange={handleTabChange} fetchIssues={fetchIssues} /> : <CitizenLoginPage handleTabChange={handleTabChange} />;
       case "issues":
         return (
           <IssuesPage
@@ -132,6 +145,7 @@ function App() {
             currentUser={user}
             issuesState={issuesState}
             handleUpdateStatus={handleUpdateStatus}
+            handleDeleteIssue={handleDeleteIssue}
           />
         );
       case "profile":
@@ -152,25 +166,27 @@ function App() {
         return <PrivacyPolicyPage />;
       case "services":
         return <ServicesPage handleTabChange={handleTabChange} />;
+      
+      // ✨ MODIFIED: Removed the login check for the 'track' page
       case "track":
         return <TrackApplicationPage handleTabChange={handleTabChange} />;
+
       case "birth-certificate":
-        return <BirthCertificatePage handleTabChange={handleTabChange} />;
+        return user ? <BirthCertificatePage handleTabChange={handleTabChange} /> : <CitizenLoginPage handleTabChange={handleTabChange} />;
       case "death-certificate":
-        return <DeathCertificatePage handleTabChange={handleTabChange} />;
+        return user ? <DeathCertificatePage handleTabChange={handleTabChange} /> : <CitizenLoginPage handleTabChange={handleTabChange} />;
       case "water-connection":
-        return <WaterConnectionPage handleTabChange={handleTabChange} />;
+        return user ? <WaterConnectionPage handleTabChange={handleTabChange} /> : <CitizenLoginPage handleTabChange={handleTabChange} />;
+      case "feedback":
+        return user ? <FeedbackPage /> : <CitizenLoginPage handleTabChange={handleTabChange} />;
       case "dashboard":
         return user?.role === "official" ? <AdminDashboardPage /> : <HomePage handleTabChange={handleTabChange} />;
       case "property-tax":
         return <PropertyTaxPage handleTabChange={handleTabChange} />;
       case "terms":
         return <TermsOfServicePage />;
-      case "feedback":
-        return <FeedbackPage />;
-      // ADD THE CASE FOR THE NEW ROUTE
       case "view-feedback":
-        return <ViewFeedbackPage />;
+        return user?.role === "official" ? <ViewFeedbackPage /> : <HomePage handleTabChange={handleTabChange} />;
       default:
         return <HomePage handleTabChange={handleTabChange} />;
     }
@@ -191,8 +207,8 @@ function App() {
           {renderPage()}
         </div>
       </main>
-      <Footer 
-        handleTabChange={handleTabChange} 
+      <Footer
+        handleTabChange={handleTabChange}
         handleReportClick={() => (user ? handleTabChange("report") : handleTabChange("citizen-login"))}
       />
     </div>

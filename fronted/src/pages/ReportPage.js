@@ -4,7 +4,8 @@ import { AuthContext } from '../context/AuthContext';
 export const ReportPage = ({ handleTabChange, fetchIssues }) => {
     const { reportIssue } = useContext(AuthContext);
 
-    const [title, setTitle] = useState('');
+    // Changed state from 'title' to 'location'
+    const [location, setLocation] = useState('');
     const [category, setCategory] = useState('Infrastructure');
     const [description, setDescription] = useState('');
     const [images, setImages] = useState([]);
@@ -29,12 +30,14 @@ export const ReportPage = ({ handleTabChange, fetchIssues }) => {
         setError('');
         setSuccess('');
 
-        const reportData = { title, description, category, images };
+        // Using 'location' in the submission data
+        const reportData = { location, description, category, images };
         const result = await reportIssue(reportData);
 
         if (result.success) {
             setSuccess('Issue reported successfully!');
-            setTitle('');
+            // Resetting 'location' state
+            setLocation('');
             setCategory('Infrastructure');
             setDescription('');
             setImages([]);
@@ -57,8 +60,9 @@ export const ReportPage = ({ handleTabChange, fetchIssues }) => {
 
                 <form onSubmit={handleReportSubmit} className="space-y-6">
                     <div>
-                        <label htmlFor="title" className="block text-sm font-medium text-gray-700">Issue Title</label>
-                        <input id="title" type="text" placeholder="e.g., Broken Street Light" value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required />
+                        {/* Changed label, id, placeholder, value, and onChange for the location input */}
+                        <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
+                        <input id="location" type="text" placeholder="e.g., Near City Plus, Adajan" value={location} onChange={(e) => setLocation(e.target.value)} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required />
                     </div>
                     <div>
                         <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>

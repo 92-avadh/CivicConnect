@@ -59,7 +59,6 @@ export const loginUserController = async (req, res) => {
             return res.status(400).send({ success: false, message: 'Invalid password' });
         }
         
-        // EDITED LINE: Replaced process.env.JWT_SECRET with the actual string
         const token = jwt.sign({ _id: account._id, role: 'user' }, 'a9b8c7d6e5f4g3h2j1k0l9m8n7b6v5c4x3z2q1w2e3r4t5y6u7i8o9p0', { expiresIn: '7d' });
 
         res.status(200).send({
@@ -100,7 +99,6 @@ export const loginOfficialController = async (req, res) => {
             return res.status(400).send({ success: false, message: 'Invalid password' });
         }
 
-        // EDITED LINE: Replaced process.env.JWT_SECRET with the actual string
         const token = jwt.sign({ _id: official._id, role: 'official' }, 'a9b8c7d6e5f4g3h2j1k0l9m8n7b6v5c4x3z2q1w2e3r4t5y6u7i8o9p0', { expiresIn: '7d' });
 
         res.status(200).send({
@@ -120,5 +118,67 @@ export const loginOfficialController = async (req, res) => {
     } catch (error) {
         console.error("Error in Official Login:", error);
         res.status(500).send({ success: false, message: 'Error in login', error });
+    }
+};
+
+// Update Profile
+export const updateProfileController = async (req, res) => {
+    try {
+        const { name } = req.body;
+        const { _id, role } = req.user; 
+
+        if (!name || name.trim().split(' ').length < 2) {
+            return res.status(400).send({ success: false, message: 'Please provide a first and last name.' });
+        }
+
+        const [firstName, ...lastNameParts] = name.trim().split(' ');
+        const lastName = lastNameParts.join(' ');
+
+        let updatedAccount;
+        let userPayload;
+
+        if (role === 'official') {
+            updatedAccount = await OfficialModel.findByIdAndUpdate(
+                _id, 
+                { firstName, lastName }, 
+                { new: true }
+            );
+            userPayload = {
+                _id: updatedAccount._id,
+                name: `${updatedAccount.firstName} ${updatedAccount.lastName}`,
+                email: updatedAccount.email,
+                phone: updatedAccount.phone,
+                employeeId: updatedAccount.employeeId,
+                departmentId: updatedAccount.departmentId,
+                role: 'official'
+            };
+        } else {
+            updatedAccount = await UserModel.findByIdAndUpdate(
+                _id, 
+                { firstName, lastName }, 
+                { new: true }
+            );
+            userPayload = {
+                _id: updatedAccount._id,
+                name: `${updatedAccount.firstName} ${updatedAccount.lastName}`,
+                email: updatedAccount.email,
+                phone: updatedAccount.phone,
+                role: 'user'
+            };
+        }
+
+        if (!updatedAccount) {
+            return res.status(404).send({ success: false, message: 'User not found.' });
+        }
+
+        res.status(200).send({
+            success: true,
+            message: 'Profile updated successfully',
+            user: userPayload,
+        });
+
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        res.status(500).send({ success: false, message: 'Error updating profile', error });
     }
 };

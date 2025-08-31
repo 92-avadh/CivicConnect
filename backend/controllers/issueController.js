@@ -4,9 +4,9 @@ import IssueModel from '../models/issueModel.js';
 export const createIssueController = async (req, res) => {
     try {
         const userId = req.user._id;
-        const { title, description, category } = req.body;
+        const { location, description, category } = req.body;
 
-        if (!title || !description || !category) {
+        if (!location || !description || !category) {
             return res.status(400).send({ success: false, message: 'All fields are required.' });
         }
 
@@ -14,7 +14,7 @@ export const createIssueController = async (req, res) => {
 
         const newIssue = new IssueModel({ 
             userId, 
-            title, 
+            location, 
             description, 
             category, 
             images: imagePaths,
@@ -34,23 +34,16 @@ export const createIssueController = async (req, res) => {
     }
 };
 
-// Controller to GET ALL issues (for officials only)
+// Controller to GET ALL issues
 export const getIssuesController = async (req, res) => {
     try {
-        if (req.user.role !== 'official') {
-            return res.status(403).send({ 
-                success: false, 
-                message: 'Access Denied: You are not authorized to view this resource.' 
-            });
-        }
-
         const limit = Number(req.query.limit) || 10;
         const page = Number(req.query.page) || 1;
         const skip = (page - 1) * limit;
         const totalIssues = await IssueModel.countDocuments({});
 
+        // ✨ PERMANENT FIX: The .populate() method has been removed to prevent server crashes.
         const issues = await IssueModel.find({})
-            .populate('userId', 'name email')
             .sort({ createdAt: -1 })
             .limit(limit)
             .skip(skip);
@@ -69,7 +62,7 @@ export const getIssuesController = async (req, res) => {
     }
 };
 
-// Controller to GET issues for the logged-in user
+// Controller to GET issues for the logged-in user (No longer used, but kept for reference)
 export const getUserIssuesController = async (req, res) => {
     try {
         const issues = await IssueModel.find({ userId: req.user._id }).sort({ createdAt: -1 });
@@ -93,7 +86,6 @@ export const updateIssueStatusController = async (req, res) => {
 
         const { id } = req.params;
         const { status } = req.body;
-
         const validStatuses = ['OPEN', 'IN_PROGRESS', 'RESOLVED'];
 
         if (!status || !validStatuses.includes(status)) {

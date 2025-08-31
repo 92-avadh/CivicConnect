@@ -12,7 +12,7 @@ import birthCertificateRoutes from './routes/birthCertificateRoutes.js';
 import deathCertificateRoutes from './routes/deathCertificateRoutes.js';
 import waterConnectionRoutes from './routes/waterConnectionRoutes.js';
 import trackRoutes from './routes/trackRoutes.js';
-import feedbackRoutes from './routes/feedbackRoutes.js'; // Added new feedback route
+import feedbackRoutes from './routes/feedbackRoutes.js';
 
 // --- INITIAL SETUP ---
 dotenv.config();
@@ -20,7 +20,12 @@ connectDB();
 const app = express();
 
 // --- MIDDLEWARE ---
-app.use(cors());
+// ✨ MODIFIED: Updated CORS configuration to allow the custom auth header
+app.use(cors({
+  origin: ["http://localhost:3000", 
+  "http://192.168.1.4:3000"],// Allow requests from your React app
+  allowedHeaders: ["Content-Type", "x-auth-token"], // Allow the necessary headers
+}));
 app.use(express.json());
 
 const __filename = fileURLToPath(import.meta.url);
@@ -37,7 +42,7 @@ app.use('/api/birth-certificates', birthCertificateRoutes);
 app.use('/api/death-certificates', deathCertificateRoutes);
 app.use('/api/water-connections', waterConnectionRoutes);
 app.use('/api/track', trackRoutes);
-app.use('/api/feedback', feedbackRoutes); // Added new feedback route
+app.use('/api/feedback', feedbackRoutes);
 
 // --- PRODUCTION BUILD & ERROR HANDLING ---
 if (process.env.NODE_ENV === 'production') {
@@ -63,4 +68,6 @@ app.use((err, req, res, next) => {
 
 // --- SERVER LISTENER ---
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on http://0.0.0.0:${PORT}`);
+});

@@ -1,8 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { Paperclip, X, CheckCircle, RefreshCw, AlertCircle } from 'lucide-react';
+import { Paperclip, X, CheckCircle, RefreshCw, AlertCircle, MapPin, Trash2 } from 'lucide-react';
 
-// This simple modal for viewing attachments can stay as it is.
 const ImageViewer = ({ imageUrl, onClose }) => (
   <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
     <div className="relative bg-white p-4 rounded-lg max-w-4xl max-h-full">
@@ -21,12 +20,10 @@ const ImageViewer = ({ imageUrl, onClose }) => (
   </div>
 );
 
-// The component now accepts `issues` and `issuesState` as props from App.js
-export const IssuesPage = ({ issues, issuesState, handleUpdateStatus }) => {
+export const IssuesPage = ({ issues, issuesState, handleUpdateStatus, handleDeleteIssue }) => {
   const { user: currentUser } = useContext(AuthContext);
   const [viewingImage, setViewingImage] = useState(null);
 
-  // Status transitions with underscores
   const getNextStatus = (currentStatus) => {
     if (currentStatus === 'OPEN') return 'IN_PROGRESS';
     if (currentStatus === 'IN_PROGRESS') return 'RESOLVED';
@@ -55,7 +52,14 @@ export const IssuesPage = ({ issues, issuesState, handleUpdateStatus }) => {
     }
   };
 
-  // Now using the loading and error state passed down from App.js
+  const getApiUrl = () => {
+    const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    if (isLocal) {
+      return "http://localhost:5000";
+    }
+    return "http://192.168.1.4:5000";
+  };
+
   if (issuesState.loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -82,7 +86,7 @@ export const IssuesPage = ({ issues, issuesState, handleUpdateStatus }) => {
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <h2 className="text-3xl font-bold text-gray-800 text-center mb-12">
-          {currentUser?.role === 'official' ? 'All Reported Issues' : 'My Reported Issues'}
+          All Reported Issues
         </h2>
 
         {issues.length === 0 && (
@@ -95,11 +99,16 @@ export const IssuesPage = ({ issues, issuesState, handleUpdateStatus }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {issues.map((issue) => {
             const buttonProps = getButtonProps(issue.status);
+            const canDelete = currentUser?.role === 'official' || currentUser?._id === issue.userId?._id;
+
             return (
               <div key={issue._id} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-shadow flex flex-col">
                 <div className="p-5 flex-grow flex flex-col">
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-lg font-semibold text-gray-900 flex-1 pr-2">{issue.title}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 flex-1 pr-2 flex items-center gap-2">
+                        <MapPin size={18} className="text-blue-500" />
+                        {issue.location}
+                    </h3>
                     <span className={`px-2 py-1 rounded-full text-xs font-bold uppercase ${getStatusClass(issue.status)}`}>
                       {issue.status}
                     </span>
@@ -107,7 +116,7 @@ export const IssuesPage = ({ issues, issuesState, handleUpdateStatus }) => {
                   <p className="text-sm text-gray-600 mb-4 flex-grow">{issue.description}</p>
                   
                   {currentUser?.role === 'official' && issue.images && issue.images.length > 0 && (
-                    <button onClick={() => setViewingImage(`http://localhost:5000${issue.images[0]}`)} className="w-full mt-auto mb-4 flex items-center justify-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    <button onClick={() => setViewingImage(`${getApiUrl()}${issue.images[0]}`)} className="w-full mt-auto mb-4 flex items-center justify-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
                       <Paperclip size={16} className="mr-2" />
                       Open Attachment
                     </button>
@@ -115,7 +124,11 @@ export const IssuesPage = ({ issues, issuesState, handleUpdateStatus }) => {
 
                   {currentUser?.role === 'official' && (
                     <div className="mt-auto pt-4 border-t">
-                      <button onClick={() => handleUpdateStatus(issue._id, getNextStatus(issue.status))} disabled={issue.status === 'RESOLVED'} className={`w-full flex items-center justify-center px-4 py-2 text-sm font-semibold text-white rounded-md transition-colors ${buttonProps.className}`}>
+                      <button 
+                        onClick={() => handleUpdateStatus(issue._id, getNextStatus(issue.status))} 
+                        disabled={issue.status === 'RESOLVED'} 
+                        className={`w-full flex items-center justify-center px-4 py-2 text-sm font-semibold text-white rounded-md transition-colors ${buttonProps.className}`}
+                      >
                         {buttonProps.icon && <span className="mr-2">{buttonProps.icon}</span>}
                         {buttonProps.text}
                       </button>
@@ -126,6 +139,18 @@ export const IssuesPage = ({ issues, issuesState, handleUpdateStatus }) => {
                     <div className="flex justify-between"><span>Category:</span><span className="font-medium text-gray-700">{issue.category}</span></div>
                     {issue.userId?.name && <div className="flex justify-between"><span>Reported by:</span><span className="font-medium text-gray-700">{issue.userId.name}</span></div>}
                     <div className="flex justify-between"><span>Date:</span><span>{new Date(issue.createdAt).toLocaleDateString()}</span></div>
+                    
+                    {canDelete && (
+                      <div className="flex justify-end pt-2">
+                        <button
+                          onClick={() => handleDeleteIssue(issue._id)}
+                          className="flex items-center gap-1 text-red-500 hover:text-red-700 text-xs font-semibold"
+                        >
+                          <Trash2 size={14} />
+                          DELETE
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

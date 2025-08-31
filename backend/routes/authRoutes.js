@@ -3,19 +3,20 @@ import {
   registerUserController,
   loginUserController,
   loginOfficialController,
+  updateProfileController,
 } from "../controllers/authController.js";
+import authMiddleware from "../middleware/auth.js";
 
 const router = express.Router();
 
 // ----------------- Citizen -----------------
-// POST /api/auth/register-user
 router.post("/register-user", registerUserController);
-
-// POST /api/auth/login-user
 router.post("/login-user", loginUserController);
 
 // ----------------- Official -----------------
-// POST /api/auth/login-official
 router.post("/login-official", loginOfficialController);
+
+// Update Profile Route
+router.put("/update-profile", authMiddleware, updateProfileController);
 
 export default router;
