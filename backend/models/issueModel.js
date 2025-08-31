@@ -25,7 +25,8 @@ const issueSchema = new mongoose.Schema({
         {
             type: String,
             trim: true,
-        }
+            default: null
+        },
     ],
     status: {
         type: String,

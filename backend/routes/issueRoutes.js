@@ -15,7 +15,7 @@ const upload = multer({ dest: 'uploads/' });
 router.get('/', getIssuesController);
 
 // POST /api/issues/create (Create a new issue)
-router.post('/create', authMiddleware, upload.array('images', 5), createIssueController);
+router.post('/create', authMiddleware, upload.single('image'), createIssueController);
 
 // PUT /api/issues/update-status/:id (Update an issue's status, officials only)
 router.put('/update-status/:id', authMiddleware, updateIssueStatusController);

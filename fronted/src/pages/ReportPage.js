@@ -3,26 +3,26 @@ import { AuthContext } from '../context/AuthContext';
 
 export const ReportPage = ({ handleTabChange, fetchIssues }) => {
     const { reportIssue } = useContext(AuthContext);
-
-    // Changed state from 'title' to 'location'
     const [location, setLocation] = useState('');
     const [category, setCategory] = useState('Infrastructure');
     const [description, setDescription] = useState('');
-    const [images, setImages] = useState([]);
+    
+    // ✨ MODIFIED: State now holds a single image file or null
+    const [image, setImage] = useState(null);
+    
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
+    // ✨ MODIFIED: Logic now only takes the first selected file
     const handleImageUpload = (e) => {
-        const newFiles = Array.from(e.target.files);
-        if (images.length + newFiles.length > 5) {
-            setError("You can only upload a maximum of 5 files.");
-            return;
+        if (e.target.files && e.target.files.length > 0) {
+            setImage(e.target.files[0]);
         }
-        setImages(prev => [...prev, ...newFiles]);
     };
 
-    const handleRemoveImage = (indexToRemove) => {
-        setImages(prev => prev.filter((_, index) => index !== indexToRemove));
+    // ✨ MODIFIED: Logic now simply clears the single image
+    const handleRemoveImage = () => {
+        setImage(null);
     };
 
     const handleReportSubmit = async (e) => {
@@ -30,17 +30,16 @@ export const ReportPage = ({ handleTabChange, fetchIssues }) => {
         setError('');
         setSuccess('');
 
-        // Using 'location' in the submission data
-        const reportData = { location, description, category, images };
+        // ✨ MODIFIED: Pass the single image to the report data
+        const reportData = { location, description, category, image };
         const result = await reportIssue(reportData);
 
         if (result.success) {
             setSuccess('Issue reported successfully!');
-            // Resetting 'location' state
             setLocation('');
             setCategory('Infrastructure');
             setDescription('');
-            setImages([]);
+            setImage(null);
             
             await fetchIssues(); 
 
@@ -60,7 +59,6 @@ export const ReportPage = ({ handleTabChange, fetchIssues }) => {
 
                 <form onSubmit={handleReportSubmit} className="space-y-6">
                     <div>
-                        {/* Changed label, id, placeholder, value, and onChange for the location input */}
                         <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
                         <input id="location" type="text" placeholder="e.g., Near City Plus, Adajan" value={location} onChange={(e) => setLocation(e.target.value)} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required />
                     </div>
@@ -75,14 +73,15 @@ export const ReportPage = ({ handleTabChange, fetchIssues }) => {
                         <textarea id="description" placeholder="Provide details about the issue, location, etc." value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 h-32 resize-none" required />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Upload Images (Optional, Max 5)</label>
+                        <label className="block text-sm font-medium text-gray-700">Upload a Photo (Optional)</label>
                         <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                             <div className="space-y-1 text-center">
                                 <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                                 <div className="flex text-sm text-gray-600">
-                                    <label htmlFor="image-input" className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                                        <span>Upload files</span>
-                                        <input id="image-input" type="file" accept="image/*" onChange={handleImageUpload} className="sr-only" multiple />
+                                    <label htmlFor="image-input" className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                                        <span>Upload a file</span>
+                                        {/* ✨ MODIFIED: Removed the 'multiple' attribute */}
+                                        <input id="image-input" type="file" accept="image/*" onChange={handleImageUpload} className="sr-only" />
                                     </label>
                                     <p className="pl-1">or drag and drop</p>
                                 </div>
@@ -90,21 +89,20 @@ export const ReportPage = ({ handleTabChange, fetchIssues }) => {
                             </div>
                         </div>
                         
-                        {images.length > 0 && (
+                        {/* ✨ MODIFIED: UI to show only the single selected file */}
+                        {image && (
                             <div className="mt-4 space-y-2">
-                                <p className="text-sm font-medium text-gray-700">Selected files:</p>
+                                <p className="text-sm font-medium text-gray-700">Selected file:</p>
                                 <ul className="border border-green-200 bg-green-50 rounded-md divide-y divide-green-200">
-                                    {images.map((file, index) => (
-                                        <li key={index} className="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
-                                            <div className="w-0 flex-1 flex items-center">
-                                                <svg className="flex-shrink-0 h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M8 4a3 3 0 00-3 3v4a3 3 0 003 3h4a3 3 0 003-3V7a3 3 0 00-3-3H8zm0 2h4a1 1 0 011 1v4a1 1 0 01-1 1H8a1 1 0 01-1-1V7a1 1 0 011-1z" clipRule="evenodd" /></svg>
-                                                <span className="ml-2 flex-1 w-0 truncate text-green-800 font-medium">{file.name}</span>
-                                            </div>
-                                            <div className="ml-4 flex-shrink-0">
-                                                <button type="button" onClick={() => handleRemoveImage(index)} className="font-medium text-red-600 hover:text-red-500">Remove</button>
-                                            </div>
-                                        </li>
-                                    ))}
+                                    <li className="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                                        <div className="w-0 flex-1 flex items-center">
+                                            <svg className="flex-shrink-0 h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M8 4a3 3 0 00-3 3v4a3 3 0 003 3h4a3 3 0 003-3V7a3 3 0 00-3-3H8zm0 2h4a1 1 0 011 1v4a1 1 0 01-1 1H8a1 1 0 01-1-1V7a1 1 0 011-1z" clipRule="evenodd" /></svg>
+                                            <span className="ml-2 flex-1 w-0 truncate text-green-800 font-medium">{image.name}</span>
+                                        </div>
+                                        <div className="ml-4 flex-shrink-0">
+                                            <button type="button" onClick={handleRemoveImage} className="font-medium text-red-600 hover:text-red-500">Remove</button>
+                                        </div>
+                                    </li>
                                 </ul>
                             </div>
                         )}

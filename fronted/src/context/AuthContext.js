@@ -79,9 +79,9 @@ export const AuthProvider = ({ children }) => {
       formData.append("location", reportData.location);
       formData.append("description", reportData.description);
       formData.append("category", reportData.category);
-      reportData.images.forEach((imageFile) => {
-        formData.append("images", imageFile);
-      });
+      if (reportData.image) {
+        formData.append("image", reportData.image); // Key changed from 'images' to 'image'
+      }
 
       const res = await axios.post(`${API_URL}/issues/create`, formData, {
         headers: { "x-auth-token": token },

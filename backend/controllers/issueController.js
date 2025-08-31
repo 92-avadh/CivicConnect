@@ -10,7 +10,7 @@ export const createIssueController = async (req, res) => {
             return res.status(400).send({ success: false, message: 'All fields are required.' });
         }
 
-        const imagePaths = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
+        const imagePaths = req.files ? `/uploads/${req.file.filename}` : null;
 
         const newIssue = new IssueModel({ 
             userId, 

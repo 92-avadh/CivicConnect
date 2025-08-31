@@ -2,6 +2,17 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { AlertCircle, MessageSquare } from 'lucide-react';
 
+// ✨ ADDED: Helper to get the correct API URL for PC or mobile
+const getApiUrl = () => {
+    const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    if (isLocal) {
+        return "http://localhost:5000/api";
+    }
+    // IMPORTANT: Make sure this is your computer's current local IP address
+    return "http://192.168.1.4:5000/api"; 
+};
+const API_URL = getApiUrl();
+
 export const ViewFeedbackPage = () => {
     const [feedback, setFeedback] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -12,7 +23,9 @@ export const ViewFeedbackPage = () => {
             try {
                 const token = sessionStorage.getItem('authToken');
                 const config = { headers: { 'x-auth-token': token } };
-                const res = await axios.get('http://localhost:5000/api/feedback', config);
+                
+                // ✨ MODIFIED: Use the dynamic API_URL
+                const res = await axios.get(`${API_URL}/feedback`, config);
                 
                 if (res.data.success) {
                     setFeedback(res.data.feedback);
