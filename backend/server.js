@@ -20,7 +20,6 @@ connectDB();
 const app = express();
 
 // --- MIDDLEWARE ---
-// ✨ MODIFIED: Updated CORS configuration to allow the custom auth header
 app.use(cors({
   origin: ["http://localhost:3000", 
   "http://192.168.1.4:3000"],// Allow requests from your React app

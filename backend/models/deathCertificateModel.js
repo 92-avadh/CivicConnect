@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Counter from './counterModel.js'; // Import the counter
+import Counter from './counterModel.js';
 
 const deathCertificateSchema = new mongoose.Schema({
     applicationNumber: {

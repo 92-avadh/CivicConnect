@@ -16,7 +16,6 @@ router.post("/login-user", loginUserController);
 // ----------------- Official -----------------
 router.post("/login-official", loginOfficialController);
 
-// Update Profile Route
 router.put("/update-profile", authMiddleware, updateProfileController);
 
 export default router;

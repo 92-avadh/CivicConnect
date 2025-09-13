@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import axios from 'axios'; // Import axios
+import axios from 'axios'; 
 
 export const TrackApplicationPage = () => {
     const [trackingId, setTrackingId] = useState('');
-    const [application, setApplication] = useState(null); // Renamed for clarity
+    const [application, setApplication] = useState(null); 
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -18,7 +18,6 @@ export const TrackApplicationPage = () => {
         setApplication(null);
 
         try {
-            // Real API call to the new tracking endpoint
             const res = await axios.get(`http://localhost:5000/api/track/${trackingId}`);
 
             if (res.data.success) {

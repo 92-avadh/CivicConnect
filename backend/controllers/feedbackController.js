@@ -22,7 +22,6 @@ export const createFeedbackController = async (req, res) => {
     }
 };
 
-// ADDED: New function to get all feedback for officials
 export const getAllFeedbackController = async (req, res) => {
     try {
         // Ensure the user has the 'official' role from the token

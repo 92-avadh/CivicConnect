@@ -8,7 +8,6 @@ const quickLinksData = [
     { name: 'Birth Certificate', icon: '👶', tab: 'birth-certificate' },
     { name: 'Death Certificate', icon: '🕊️', tab: 'death-certificate' },
     { name: 'Water Connection', icon: '💧', tab: 'water-connection' },
-    // ✅ FIX: Changed name and tab to 'feedback'
     { name: 'Write Feedback', icon: '✍️', tab: 'feedback' }, 
     { name: 'Track Application', icon: '🔍', tab: 'track' },
 ];

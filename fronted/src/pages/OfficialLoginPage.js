@@ -62,7 +62,6 @@ const OfficialLoginPage = ({ handleTabChange }) => {
               type={showPassword ? "text" : "password"}
               placeholder="Password"
               value={password}
-              // ✅ THIS IS THE FIX: Corrected the typo from e.gantarget to e.target
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 border rounded-lg pr-12"
               required

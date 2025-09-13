@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
-import Counter from './counterModel.js'; // Ensure you have the counter model
-
+import Counter from './counterModel.js'; 
 const birthCertificateSchema = new mongoose.Schema({
     applicationNumber: { type: String, unique: true },
     applicantId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -26,7 +25,6 @@ birthCertificateSchema.pre('save', async function (next) {
             );
             this.applicationNumber = `SMC-BC-${counter.seq}`;
         } catch (error) {
-            // This ensures any error here stops the process and is reported
             return next(error);
         }
     }

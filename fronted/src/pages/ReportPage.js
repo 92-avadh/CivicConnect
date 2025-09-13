@@ -7,20 +7,17 @@ export const ReportPage = ({ handleTabChange, fetchIssues }) => {
     const [category, setCategory] = useState('Infrastructure');
     const [description, setDescription] = useState('');
     
-    // ✨ MODIFIED: State now holds a single image file or null
     const [image, setImage] = useState(null);
     
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    // ✨ MODIFIED: Logic now only takes the first selected file
     const handleImageUpload = (e) => {
         if (e.target.files && e.target.files.length > 0) {
             setImage(e.target.files[0]);
         }
     };
 
-    // ✨ MODIFIED: Logic now simply clears the single image
     const handleRemoveImage = () => {
         setImage(null);
     };
@@ -30,7 +27,6 @@ export const ReportPage = ({ handleTabChange, fetchIssues }) => {
         setError('');
         setSuccess('');
 
-        // ✨ MODIFIED: Pass the single image to the report data
         const reportData = { location, description, category, image };
         const result = await reportIssue(reportData);
 

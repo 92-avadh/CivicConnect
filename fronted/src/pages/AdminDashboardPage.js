@@ -3,13 +3,11 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { AlertCircle, Paperclip, X } from 'lucide-react';
 
-// ✨ ADDED: Helper to get the correct API URL for PC or mobile
 const getApiUrl = () => {
     const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
     if (isLocal) {
         return "http://localhost:5000";
     }
-    // IMPORTANT: Make sure this is your computer's current local IP address
     return "http://192.168.1.4:5000"; 
 };
 const API_BASE_URL = getApiUrl();
@@ -124,7 +122,6 @@ export const AdminDashboardPage = () => {
     const [viewingImage, setViewingImage] = useState(null);
     const [imageTitle, setImageTitle] = useState('');
 
-    // ✨ FIXED: Wrapped fetchData in useCallback to prevent re-creation on every render
     const fetchData = useCallback(async () => {
         if (!currentUser) return;
         setLoading(true);

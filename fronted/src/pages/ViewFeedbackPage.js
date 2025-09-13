@@ -8,7 +8,6 @@ const getApiUrl = () => {
     if (isLocal) {
         return "http://localhost:5000/api";
     }
-    // IMPORTANT: Make sure this is your computer's current local IP address
     return "http://192.168.1.4:5000/api"; 
 };
 const API_URL = getApiUrl();
@@ -24,7 +23,6 @@ export const ViewFeedbackPage = () => {
                 const token = sessionStorage.getItem('authToken');
                 const config = { headers: { 'x-auth-token': token } };
                 
-                // ✨ MODIFIED: Use the dynamic API_URL
                 const res = await axios.get(`${API_URL}/feedback`, config);
                 
                 if (res.data.success) {

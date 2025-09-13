@@ -10,7 +10,6 @@ import {
 const router = express.Router();
 
 // --- Citizen Routes ---
-// ✅ This MUST be router.post
 router.post('/apply', authMiddleware, applyForBirthCertificate);
 router.get('/my-applications', authMiddleware, getUserBirthCertificates);
 

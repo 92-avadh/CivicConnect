@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Counter from './counterModel.js'; // Import the counter
+import Counter from './counterModel.js'; 
 
 const waterConnectionSchema = new mongoose.Schema({
     applicationNumber: {
@@ -13,7 +13,7 @@ const waterConnectionSchema = new mongoose.Schema({
     },
     applicantName: { type: String, required: true },
     propertyAddress: { type: String, required: true },
-    addressProof: { type: String }, // Path to the uploaded file
+    addressProof: { type: String },
     status: {
         type: String,
         default: 'SUBMITTED',

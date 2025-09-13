@@ -7,7 +7,6 @@ export const Footer = ({ handleTabChange, handleReportClick }) => (
           <div>
             <h3 className="text-sm font-semibold text-gray-300 tracking-wider uppercase">Quick Links</h3>
             <ul className="mt-4 space-y-2">
-              {/* EDITED: Added href attributes to all links */}
               <li><a href="#home" onClick={() => handleTabChange('home')} className="text-base text-gray-400 hover:text-white cursor-pointer">Home</a></li>
               <li><a href="#issues" onClick={() => handleTabChange('issues')} className="text-base text-gray-400 hover:text-white cursor-pointer">View Issues</a></li>
               <li><a href="#report" onClick={handleReportClick} className="text-base text-gray-400 hover:text-white cursor-pointer">Report an Issue</a></li>

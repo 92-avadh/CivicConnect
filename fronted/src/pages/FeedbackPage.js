@@ -20,7 +20,7 @@ export const FeedbackPage = () => {
 
         // Clean up the timer if the component unmounts before the 2 seconds are up.
         return () => clearTimeout(timer);
-    }, [isSubmitted]); // This hook runs only when the `isSubmitted` state changes.
+    }, [isSubmitted]); //  runs only when the `isSubmitted` state changes.
 
     const handleSubmit = async (e) => {
         e.preventDefault();

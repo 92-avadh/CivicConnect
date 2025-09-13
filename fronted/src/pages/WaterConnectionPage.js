@@ -36,7 +36,6 @@ export const WaterConnectionPage = ({ handleTabChange }) => {
             });
 
             if (res.data.success) {
-                // ✅ FIX: Use a prompt/alert to show the application number
                 alert(`Application submitted successfully!\nYour Application Number is: ${res.data.applicationNumber}`);
                 handleTabChange('home');
             }

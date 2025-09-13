@@ -17,7 +17,6 @@ const CitizenRegisterPage = ({ handleTabChange }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Validation
   const isValidPhone = /^\d{10}$/.test(phone);
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isValidPassword =
@@ -66,7 +65,6 @@ const CitizenRegisterPage = ({ handleTabChange }) => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
         
-        {/* ✅ EDITED: Replaced layout with a CSS Grid to prevent overlap */}
         <div className="grid grid-cols-3 items-center mb-6">
           <div className="text-left">
             <button
@@ -82,7 +80,6 @@ const CitizenRegisterPage = ({ handleTabChange }) => {
               Registration
             </h2>
           </div>
-          {/* Empty div in the third column to keep the title perfectly centered */}
           <div />
         </div>
 

@@ -26,7 +26,6 @@ const officialSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  // ✅ FIXED: Changed field name to match the frontend form
   departmentId: {
     type: String,
     required: true,

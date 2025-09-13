@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }) => {
       formData.append("description", reportData.description);
       formData.append("category", reportData.category);
       if (reportData.image) {
-        formData.append("image", reportData.image); // Key changed from 'images' to 'image'
+        formData.append("image", reportData.image); 
       }
 
       const res = await axios.post(`${API_URL}/issues/create`, formData, {

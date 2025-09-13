@@ -11,7 +11,6 @@ import {
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
-// ✨ MODIFIED FOR TESTING: authMiddleware has been temporarily removed from this line.
 router.get('/', getIssuesController);
 
 // POST /api/issues/create (Create a new issue)

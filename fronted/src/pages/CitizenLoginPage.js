@@ -10,7 +10,6 @@ const CitizenLoginPage = ({ handleTabChange }) => {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // Basic validation for demonstration; you might want more complex logic
   const isFormValid = email.includes("@") && password.length >= 8;
 
   const handleSubmit = async (e) => {
@@ -27,8 +26,6 @@ const CitizenLoginPage = ({ handleTabChange }) => {
     if (result && !result.success) {
       setError(result.message);
     }
-    // On successful login, the AuthContext will update the user state,
-    // and the App component will automatically navigate to the home page.
   };
 
   return (
@@ -84,7 +81,6 @@ const CitizenLoginPage = ({ handleTabChange }) => {
         <p className="text-center mt-4 text-sm">
           Don’t have an account?{" "}
           <span
-            // ✅ FIXED: Changed route to 'citizen-register'
             onClick={() => handleTabChange("citizen-register")}
             className="text-blue-600 cursor-pointer font-semibold hover:underline"
           >

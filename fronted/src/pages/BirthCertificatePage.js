@@ -16,10 +16,7 @@ export const BirthCertificatePage = ({ handleTabChange }) => {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    // --- Validation ---
-    // 1. Check if the selected date is in the future
     const isFutureDate = new Date(formData.dateOfBirth) > new Date();
-    // 2. Check if all fields are filled and the date is valid
     const isFormValid = Object.values(formData).every(field => field.trim() !== "") && !isFutureDate;
 
     const handleSubmit = async (e) => {
@@ -59,7 +56,6 @@ export const BirthCertificatePage = ({ handleTabChange }) => {
                             type="date" 
                             value={formData.dateOfBirth} 
                             onChange={handleChange} 
-                            // 3. Set the max selectable date to today
                             max={new Date().toISOString().split("T")[0]}
                             required 
                             className={`mt-1 w-full px-3 py-2 border rounded-md ${isFutureDate ? 'border-red-500' : ''}`} 

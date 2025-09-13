@@ -14,9 +14,7 @@ export const DeathCertificatePage = ({ handleTabChange }) => {
     };
 
     // --- Validation ---
-    // 1. Check if the selected date is in the future
     const isFutureDate = new Date(formData.dateOfDeath) > new Date();
-    // 2. Check if all fields are filled and the date is valid
     const isFormValid = Object.values(formData).every(field => field.trim() !== "") && !isFutureDate;
 
     const handleSubmit = async (e) => {

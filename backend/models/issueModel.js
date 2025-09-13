@@ -6,7 +6,7 @@ const issueSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
-    location: { // Changed from 'title' to 'location'
+    location: { 
         type: String,
         required: true,
         trim: true,

@@ -42,7 +42,6 @@ export const getIssuesController = async (req, res) => {
         const skip = (page - 1) * limit;
         const totalIssues = await IssueModel.countDocuments({});
 
-        // ✨ PERMANENT FIX: The .populate() method has been removed to prevent server crashes.
         const issues = await IssueModel.find({})
             .sort({ createdAt: -1 })
             .limit(limit)
