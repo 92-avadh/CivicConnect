@@ -1,0 +1,22 @@
+/* Add this to your global CSS file, like src/index.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.page-container {
+  animation: fadeInAnimation ease 0.5s;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fadeInAnimation {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
