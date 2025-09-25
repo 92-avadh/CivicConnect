@@ -6,7 +6,8 @@ import {
     applyForBirthCertificate,
     getUserBirthCertificates,
     getAllBirthCertificates,
-    updateBirthCertificateStatus
+    updateBirthCertificateStatus,
+    deleteBirthCertificate
 } from '../controllers/birthCertificateController.js';
 
 const router = express.Router();
@@ -19,5 +20,6 @@ router.get('/my-applications', auth, getUserBirthCertificates);
 // --- Official Routes ---
 router.get('/all', auth, isOfficial, getAllBirthCertificates);
 router.put('/update-status/:id', auth, isOfficial, updateBirthCertificateStatus);
+router.delete('/delete/:id', auth, isOfficial, deleteBirthCertificate);
 
 export default router;

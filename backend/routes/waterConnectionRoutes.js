@@ -7,7 +7,8 @@ import {
     applyForWaterConnection,
     getUserWaterConnections,
     getAllWaterConnections,
-    updateWaterConnectionStatus
+    updateWaterConnectionStatus,
+    deleteWaterConnection
 } from '../controllers/waterConnectionController.js';
 
 const router = express.Router();
@@ -22,5 +23,6 @@ router.get('/my-applications', auth, getUserWaterConnections);
 // 👇 Added isOfficial middleware for protection
 router.get('/all', auth, isOfficial, getAllWaterConnections);
 router.put('/update-status/:id', auth, isOfficial, updateWaterConnectionStatus);
+router.delete('/delete/:id', auth, isOfficial, deleteWaterConnection);
 
 export default router;

@@ -60,3 +60,17 @@ export const updateWaterConnectionStatus = async (req, res) => {
     }
 };
 
+export const deleteWaterConnection = async (req, res) => {
+    try {
+        if (req.user.role !== 'official') {
+            return res.status(403).send({ success: false, message: 'Access Denied.' });
+        }
+        const application = await WaterConnectionModel.findByIdAndDelete(req.params.id);
+        if (!application) {
+            return res.status(404).send({ success: false, message: 'Application not found.' });
+        }
+        res.status(200).send({ success: true, message: 'Application deleted successfully.' });
+    } catch (error) {
+        res.status(500).send({ success: false, message: 'Server error.' });
+    }
+};

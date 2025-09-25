@@ -14,14 +14,14 @@ export const createIssueController = async (req, res) => {
             return res.status(400).send({ success: false, message: 'All fields are required.' });
         }
 
-        const imagePaths = req.files ? `/uploads/${req.file.filename}` : null;
+        const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
 
         const newIssue = new IssueModel({
             userId,
             location,
             description,
             category,
-            images: imagePaths,
+            images: imagePath ? [imagePath] : [],
             status: "OPEN"
         });
 
@@ -100,7 +100,7 @@ export const deleteIssueController = async (req, res) => {
             return res.status(404).send({ success: false, message: 'Issue not found.' });
         }
 
-        if (issue.userId.toString() !== req.user._id && req.user.role !== 'official') {
+        if (req.user.role !== 'official') {
             return res.status(403).send({ success: false, message: 'Access denied.' });
         }
 

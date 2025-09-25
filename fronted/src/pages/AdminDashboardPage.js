@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { AlertCircle, Paperclip, X } from 'lucide-react';
+import { AlertCircle, Paperclip, X, Trash2 } from 'lucide-react';
 
 const getApiUrl = () => {
     const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
     if (isLocal) {
         return "http://localhost:5000";
     }
-    return "http://192.168.1.4:5000"; 
+    return "http://192.168.1.4:5000";
 };
 const API_BASE_URL = getApiUrl();
 
@@ -17,16 +17,16 @@ const ImageViewer = ({ imageUrl, onClose, title = "Attachment" }) => (
         <div className="relative bg-white p-4 rounded-lg max-w-4xl max-h-full">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-                <button 
-                    onClick={onClose} 
+                <button
+                    onClick={onClose}
                     className="bg-gray-100 hover:bg-gray-200 rounded-full p-2 transition-colors"
                 >
                     <X size={20} />
                 </button>
             </div>
-            <img 
-                src={imageUrl} 
-                alt="Application Attachment" 
+            <img
+                src={imageUrl}
+                alt="Application Attachment"
                 className="max-w-full max-h-[80vh] object-contain rounded-lg"
             />
         </div>
@@ -67,7 +67,7 @@ const WaterConnectionAttachment = ({ application, onViewImage }) => {
     };
 
     const images = getImageSources(application);
-    
+
     if (images.length === 0) {
         return <span className="text-xs text-gray-400 italic">No attachments</span>;
     }
@@ -87,8 +87,9 @@ const WaterConnectionAttachment = ({ application, onViewImage }) => {
     );
 };
 
-const StatusActions = ({ application, type, onUpdate }) => {
+const StatusActions = ({ application, type, onUpdate, onDelete }) => {
     const handleUpdate = (newStatus) => onUpdate(application._id, newStatus, type);
+    const handleDelete = () => onDelete(application._id, type);
 
     return (
         <div className="flex items-center space-x-2">
@@ -108,12 +109,13 @@ const StatusActions = ({ application, type, onUpdate }) => {
                     </button>
                 </>
             )}
+            <button onClick={handleDelete} className="p-2 text-red-600 hover:text-red-800"><Trash2 size={16} /></button>
         </div>
     );
 };
 
 export const AdminDashboardPage = () => {
-    const { user: currentUser, loading: authLoading } = useContext(AuthContext);
+    const { user: currentUser, loading: authLoading, deleteApplication } = useContext(AuthContext);
     const [birthApps, setBirthApps] = useState([]);
     const [deathApps, setDeathApps] = useState([]);
     const [waterApps, setWaterApps] = useState([]);
@@ -145,7 +147,6 @@ export const AdminDashboardPage = () => {
         }
     }, [currentUser]); // Dependency for useCallback
 
-    // ✨ FIXED: Added 'fetchData' to the dependency array
     useEffect(() => {
         if (!authLoading && currentUser) {
             fetchData();
@@ -155,7 +156,7 @@ export const AdminDashboardPage = () => {
     const handleUpdateStatus = async (id, status, type) => {
         try {
             const token = sessionStorage.getItem('authToken');
-            await axios.put(`${API_BASE_URL}/api/${type}/update-status/${id}`, 
+            await axios.put(`${API_BASE_URL}/api/${type}/update-status/${id}`,
                 { status },
                 { headers: { 'x-auth-token': token } }
             );
@@ -166,11 +167,22 @@ export const AdminDashboardPage = () => {
         }
     };
 
+    const handleDeleteApplication = async (id, type) => {
+        if (window.confirm("Are you sure you want to delete this application? This action cannot be undone.")) {
+            const result = await deleteApplication(id, type);
+            if (result.success) {
+                fetchData(); // Refetch data after deletion
+            } else {
+                alert(`Error: ${result.message}`);
+            }
+        }
+    };
+
     const handleViewImage = (imageUrl, title) => {
         setViewingImage(imageUrl);
         setImageTitle(title);
     };
-    
+
     const closeImageViewer = () => setViewingImage(null);
 
     if (authLoading || loading) {
@@ -180,7 +192,7 @@ export const AdminDashboardPage = () => {
             </div>
         );
     }
-    
+
     if (error) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -196,8 +208,7 @@ export const AdminDashboardPage = () => {
         <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
                 <h2 className="text-3xl font-bold text-gray-800 text-center mb-12">Admin Dashboard</h2>
-                
-                {/* ✨ FIXED: Restored the table JSX to use the previously 'unused' components and functions */}
+
                 <div className="mb-12">
                     <h3 className="text-xl font-semibold text-gray-700 mb-4">Birth Certificate Applications ({birthApps.length})</h3>
                     <div className="bg-white shadow-sm rounded-lg overflow-x-auto">
@@ -205,7 +216,7 @@ export const AdminDashboardPage = () => {
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50"><tr><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">App No.</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Child's Name</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th></tr></thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {birthApps.map(app => (<tr key={app._id}><td className="px-6 py-4 text-sm font-medium text-gray-900">{app.applicationNumber}</td><td className="px-6 py-4 text-sm text-gray-900">{app.childsFullName}</td><td className="px-6 py-4 text-sm"><StatusActions application={app} type="birth-certificates" onUpdate={handleUpdateStatus} /></td></tr>))}
+                                    {birthApps.map(app => (<tr key={app._id}><td className="px-6 py-4 text-sm font-medium text-gray-900">{app.applicationNumber}</td><td className="px-6 py-4 text-sm text-gray-900">{app.childsFullName}</td><td className="px-6 py-4 text-sm"><StatusActions application={app} type="birth-certificates" onUpdate={handleUpdateStatus} onDelete={handleDeleteApplication} /></td></tr>))}
                                 </tbody>
                             </table>
                         ) : (<p className="text-center py-8 text-gray-500">No applications found.</p>)}
@@ -219,7 +230,7 @@ export const AdminDashboardPage = () => {
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50"><tr><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">App No.</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Deceased's Name</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th></tr></thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {deathApps.map(app => (<tr key={app._id}><td className="px-6 py-4 text-sm font-medium text-gray-900">{app.applicationNumber}</td><td className="px-6 py-4 text-sm text-gray-900">{app.deceasedsFullName}</td><td className="px-6 py-4 text-sm"><StatusActions application={app} type="death-certificates" onUpdate={handleUpdateStatus} /></td></tr>))}
+                                    {deathApps.map(app => (<tr key={app._id}><td className="px-6 py-4 text-sm font-medium text-gray-900">{app.applicationNumber}</td><td className="px-6 py-4 text-sm text-gray-900">{app.deceasedsFullName}</td><td className="px-6 py-4 text-sm"><StatusActions application={app} type="death-certificates" onUpdate={handleUpdateStatus} onDelete={handleDeleteApplication} /></td></tr>))}
                                 </tbody>
                             </table>
                         ) : (<p className="text-center py-8 text-gray-500">No applications found.</p>)}
@@ -233,14 +244,14 @@ export const AdminDashboardPage = () => {
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50"><tr><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">App No.</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Applicant</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Attachments</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th></tr></thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {waterApps.map(app => (<tr key={app._id}><td className="px-6 py-4 text-sm font-medium text-gray-900">{app.applicationNumber}</td><td className="px-6 py-4 text-sm text-gray-900">{app.applicantName}</td><td className="px-6 py-4 text-sm"><WaterConnectionAttachment application={app} onViewImage={handleViewImage}/></td><td className="px-6 py-4 text-sm"><StatusActions application={app} type="water-connections" onUpdate={handleUpdateStatus} /></td></tr>))}
+                                    {waterApps.map(app => (<tr key={app._id}><td className="px-6 py-4 text-sm font-medium text-gray-900">{app.applicationNumber}</td><td className="px-6 py-4 text-sm text-gray-900">{app.applicantName}</td><td className="px-6 py-4 text-sm"><WaterConnectionAttachment application={app} onViewImage={handleViewImage}/></td><td className="px-6 py-4 text-sm"><StatusActions application={app} type="water-connections" onUpdate={handleUpdateStatus} onDelete={handleDeleteApplication} /></td></tr>))}
                                 </tbody>
                             </table>
                         ) : (<p className="text-center py-8 text-gray-500">No applications found.</p>)}
                     </div>
                 </div>
             </div>
-            
+
             {viewingImage && <ImageViewer imageUrl={viewingImage} onClose={closeImageViewer} title={imageTitle} />}
         </div>
     );

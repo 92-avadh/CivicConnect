@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }) => {
       formData.append("description", reportData.description);
       formData.append("category", reportData.category);
       if (reportData.image) {
-        formData.append("image", reportData.image); 
+        formData.append("image", reportData.image);
       }
 
       const res = await axios.post(`${API_URL}/issues/create`, formData, {
@@ -127,23 +127,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const updateProfile = async (userData) => {
+  const deleteApplication = async (id, type) => {
     try {
-      const token = sessionStorage.getItem("authToken");
-      if (!token) return { success: false, message: "Please log in." };
+        const token = sessionStorage.getItem('authToken');
+        if (!token) return { success: false, message: "Please log in." };
 
-      const res = await axios.put(`${API_URL}/auth/update-profile`, userData, {
-          headers: { 'x-auth-token': token }
-      });
+        const res = await axios.delete(`${API_URL}/${type}/delete/${id}`, {
+            headers: { 'x-auth-token': token }
+        });
 
-      if (res.data.success) {
-        setUser(res.data.user);
-        sessionStorage.setItem("user", JSON.stringify(res.data.user));
-      }
-
-      return res.data;
+        return res.data;
     } catch (error) {
-      return { success: false, message: error.response?.data?.message || "Failed to update profile." };
+        return { success: false, message: error.response?.data?.message || "Failed to delete application." };
     }
   };
 
@@ -163,9 +158,9 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, loginOfficial, register, reportIssue, logout, updateIssueStatus, forceLogout, deleteIssue, updateProfile }}
+      value={{ user, login, loginOfficial, register, reportIssue, logout, updateIssueStatus, forceLogout, deleteIssue, deleteApplication }}
     >
       {children}
-    </AuthContext.Provider> 
+    </AuthContext.Provider>
   );
 };

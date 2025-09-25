@@ -27,9 +27,17 @@ export const FeedbackPage = () => {
         setError('');
 
         try {
+            const token = sessionStorage.getItem('authToken');
+            if (!token) {
+                setError('You must be logged in to submit feedback.');
+                return;
+            }
+
             const res = await axios.post('http://localhost:5000/api/feedback/submit', {
                 feedbackType,
                 message
+            }, {
+                headers: { 'x-auth-token': token }
             });
 
             if (res.data.success) {

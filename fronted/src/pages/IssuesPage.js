@@ -99,7 +99,7 @@ export const IssuesPage = ({ issues, issuesState, handleUpdateStatus, handleDele
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {issues.map((issue) => {
             const buttonProps = getButtonProps(issue.status);
-            const canDelete = currentUser?.role === 'official' || currentUser?._id === issue.userId?._id;
+            const canDelete = currentUser?.role === 'official';
 
             return (
               <div key={issue._id} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-shadow flex flex-col">
