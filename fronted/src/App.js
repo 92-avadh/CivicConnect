@@ -16,7 +16,7 @@ import { CivicSensePage } from "./pages/CivicSensePage.js";
 import { LawPage } from "./pages/LawPage.js";
 import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage.js";
 import { ServicesPage } from "./pages/ServicesPage.js";
-import { TrackApplicationPage } from "./pages/TrackApplicationPage.js";
+import { AboutApplicationPage } from "./pages/AboutApplicationPage.js";
 import { BirthCertificatePage } from "./pages/BirthCertificatePage.js";
 import { DeathCertificatePage } from "./pages/DeathCertificatePage.js";
 import { WaterConnectionPage } from "./pages/WaterConnectionPage.js";
@@ -167,9 +167,8 @@ function App() {
       case "services":
         return <ServicesPage handleTabChange={handleTabChange} />;
       
-      // ✨ MODIFIED: Removed the login check for the 'track' page
       case "track":
-        return <TrackApplicationPage handleTabChange={handleTabChange} />;
+        return <AboutApplicationPage handleTabChange={handleTabChange} />;
 
       case "birth-certificate":
         return user ? <BirthCertificatePage handleTabChange={handleTabChange} /> : <CitizenLoginPage handleTabChange={handleTabChange} />;

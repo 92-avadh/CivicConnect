@@ -3,14 +3,7 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { AlertCircle, Paperclip, X, Trash2 } from 'lucide-react';
 
-const getApiUrl = () => {
-    const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    if (isLocal) {
-        return "http://localhost:5000";
-    }
-    return "http://192.168.1.4:5000";
-};
-const API_BASE_URL = getApiUrl();
+const API_BASE_URL = "http://localhost:5000";
 
 const ImageViewer = ({ imageUrl, onClose, title = "Attachment" }) => (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
@@ -134,7 +127,7 @@ export const AdminDashboardPage = () => {
             const [birthRes, deathRes, waterRes] = await Promise.all([
                 axios.get(`${API_BASE_URL}/api/birth-certificates/all`, config),
                 axios.get(`${API_BASE_URL}/api/death-certificates/all`, config),
-                axios.get(`${API_BASE_URL}/api/water-connections/all`, config)
+                axios.get(`${API_BASE_URL}/api/water-connections/all`, config),
             ]);
             setBirthApps(birthRes.data.applications || []);
             setDeathApps(deathRes.data.applications || []);
@@ -145,7 +138,7 @@ export const AdminDashboardPage = () => {
         } finally {
             setLoading(false);
         }
-    }, [currentUser]); // Dependency for useCallback
+    }, [currentUser]);
 
     useEffect(() => {
         if (!authLoading && currentUser) {
@@ -177,7 +170,7 @@ export const AdminDashboardPage = () => {
             }
         }
     };
-
+    
     const handleViewImage = (imageUrl, title) => {
         setViewingImage(imageUrl);
         setImageTitle(title);
@@ -251,7 +244,7 @@ export const AdminDashboardPage = () => {
                     </div>
                 </div>
             </div>
-
+            
             {viewingImage && <ImageViewer imageUrl={viewingImage} onClose={closeImageViewer} title={imageTitle} />}
         </div>
     );

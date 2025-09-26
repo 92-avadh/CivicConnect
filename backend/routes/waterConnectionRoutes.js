@@ -8,7 +8,8 @@ import {
     getUserWaterConnections,
     getAllWaterConnections,
     updateWaterConnectionStatus,
-    deleteWaterConnection
+    deleteWaterConnection,
+    editWaterConnection
 } from '../controllers/waterConnectionController.js';
 
 const router = express.Router();
@@ -18,6 +19,7 @@ const upload = multer({ dest: 'uploads/' });
 // 👇 This now correctly uses 'applyForWaterConnection'
 router.post('/apply', auth, upload.single('addressProof'), applyForWaterConnection);
 router.get('/my-applications', auth, getUserWaterConnections);
+router.put('/edit/:id', auth, upload.single('addressProof'), editWaterConnection);
 
 // --- Official Routes ---
 // 👇 Added isOfficial middleware for protection

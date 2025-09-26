@@ -142,6 +142,28 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateApplication = async (id, type, data) => {
+    try {
+      const token = sessionStorage.getItem('authToken');
+      if (!token) return { success: false, message: "Please log in." };
+
+      let endpoint = '';
+      if (type === 'Birth Certificate') endpoint = `${API_URL}/birth-certificates/edit/${id}`;
+      else if (type === 'Death Certificate') endpoint = `${API_URL}/death-certificates/edit/${id}`;
+      else if (type === 'Water Connection') endpoint = `${API_URL}/water-connections/edit/${id}`;
+      
+      if(!endpoint) return { success: false, message: "Invalid application type." };
+
+      const res = await axios.put(endpoint, data, {
+        headers: { 'x-auth-token': token }
+      });
+
+      return res.data;
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || "Failed to update application." };
+    }
+  };
+
   const logout = () => {
     setUser(null);
     sessionStorage.removeItem("authToken");
@@ -158,7 +180,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, loginOfficial, register, reportIssue, logout, updateIssueStatus, forceLogout, deleteIssue, deleteApplication }}
+      value={{ user, login, loginOfficial, register, reportIssue, logout, updateIssueStatus, forceLogout, deleteIssue, deleteApplication, updateApplication }}
     >
       {children}
     </AuthContext.Provider>

@@ -24,6 +24,19 @@ export const IssuesPage = ({ issues, issuesState, handleUpdateStatus, handleDele
   const { user: currentUser } = useContext(AuthContext);
   const [viewingImage, setViewingImage] = useState(null);
 
+  // If the user is not logged in, show a message instead of loading.
+  if (!currentUser) {
+    return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+            <div className="text-center bg-white rounded-lg p-8 shadow-md max-w-sm mx-auto">
+                <AlertCircle className="mx-auto h-12 w-12 text-blue-500 mb-4" />
+                <h2 className="text-xl font-semibold text-gray-800 mb-2">Authentication Required</h2>
+                <p className="text-gray-600">Please log in to see your records.</p>
+            </div>
+        </div>
+    );
+  }
+
   const getNextStatus = (currentStatus) => {
     if (currentStatus === 'OPEN') return 'IN_PROGRESS';
     if (currentStatus === 'IN_PROGRESS') return 'RESOLVED';

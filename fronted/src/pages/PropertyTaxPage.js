@@ -20,7 +20,7 @@ export const PropertyTaxPage = () => (
                 </ol>
                 <div className="mt-8 text-center">
                     <button className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md shadow-sm hover:bg-blue-700">
-                        Proceed to Pay Tax
+                       the feature will be added soon 
                     </button>
                 </div>
             </div>

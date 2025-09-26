@@ -8,8 +8,8 @@ const quickLinksData = [
     { name: 'Birth Certificate', icon: '👶', tab: 'birth-certificate' },
     { name: 'Death Certificate', icon: '🕊️', tab: 'death-certificate' },
     { name: 'Water Connection', icon: '💧', tab: 'water-connection' },
-    { name: 'Write Feedback', icon: '✍️', tab: 'feedback' }, 
-    { name: 'Track Application', icon: '🔍', tab: 'track' },
+    { name: 'Write Feedback', icon: '✍️', tab: 'feedback' },
+    { name: 'About Application', icon: '🔍', tab: 'track' },
 ];
 
 const newsUpdatesData = [
@@ -40,9 +40,9 @@ const QuickLinksSection = ({ handleTabChange }) => (
             <h2 className="text-2xl font-semibold text-gray-800 text-center mb-8">Quick Links</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-center">
                 {quickLinksData.map(link => (
-                    <button 
-                        key={link.name} 
-                        onClick={() => handleTabChange(link.tab)} 
+                    <button
+                        key={link.name}
+                        onClick={() => handleTabChange(link.tab)}
                         className="p-4 bg-gray-100 rounded-lg hover:bg-blue-100 hover:shadow-md cursor-pointer transition"
                     >
                         <div className="text-3xl mb-2">{link.icon}</div>

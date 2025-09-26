@@ -6,13 +6,15 @@ import {
   getAllDeathCertificates,
   updateDeathCertificateStatus,
   deleteDeathCertificate,
+  editDeathCertificate
 } from "../controllers/deathCertificateController.js";
 
 const router = express.Router();
 
-// --- Citizen Routes ---
+// Routes
 router.post("/apply", auth, applyForDeathCertificate);
 router.get("/my-applications", auth, getUserDeathCertificates);
+router.put('/edit/:id', auth, editDeathCertificate);
 
 // --- Official Routes ---
 router.get("/all", auth, isOfficial, getAllDeathCertificates);

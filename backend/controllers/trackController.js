@@ -10,19 +10,11 @@ export const trackApplicationController = async (req, res) => {
         let result = null;
         let type = '';
 
-        if (mongoose.Types.ObjectId.isValid(id)) {
-            const issue = await IssueModel.findById(id);
-            if (issue) {
-                result = issue;
-                type = 'Civic Issue';
-            }
-        }
-
         if (!result) {
             const birthCert = await BirthCertificateModel.findOne({ applicationNumber: id });
             if (birthCert) {
                 result = birthCert;
-                type = `Birth Certificate for ${birthCert.childsFullName || 'N/A'}`;
+                type = 'Birth Certificate';
             }
         }
 
@@ -30,7 +22,7 @@ export const trackApplicationController = async (req, res) => {
             const deathCert = await DeathCertificateModel.findOne({ applicationNumber: id });
             if (deathCert) {
                 result = deathCert;
-                type = `Death Certificate for ${deathCert.deceasedsFullName || 'N/A'}`;
+                type = 'Death Certificate';
             }
         }
         
@@ -38,21 +30,23 @@ export const trackApplicationController = async (req, res) => {
             const waterConn = await WaterConnectionModel.findOne({ applicationNumber: id });
             if (waterConn) {
                 result = waterConn;
-                type = `Water Connection for ${waterConn.applicantName || 'N/A'}`;
+                type = 'Water Connection';
             }
         }
         
         if (!result) {
+             const issue = await IssueModel.findOne({_id: id});
+            if(issue){
+                result = issue;
+                type = 'Civic Issue'
+            }
+        }
+
+        if (!result) {
             return res.status(404).send({ success: false, message: 'Application not found' });
         }
 
-        const application = {
-            title: result.title || type,
-            status: result.status,
-            createdAt: result.createdAt,
-        };
-
-        res.status(200).send({ success: true, application });
+        res.status(200).send({ success: true, application: result, type: type });
 
     } catch (error) {
         console.error("Error in track controller:", error);

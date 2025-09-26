@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import WaterConnectionModel from '../models/waterConnectionModel.js';
 
 export const applyForWaterConnection = async (req, res) => {
@@ -20,6 +21,41 @@ export const applyForWaterConnection = async (req, res) => {
     }
 };
 
+export const editWaterConnection = async (req, res) => {
+    try {
+        // 👇 ADDED: Validate the ID format to prevent crashes
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).send({ success: false, message: 'Invalid Application ID format.' });
+        }
+
+        const application = await WaterConnectionModel.findById(req.params.id);
+        if (!application) {
+            return res.status(404).send({ success: false, message: 'Application not found.' });
+        }
+        if (application.applicantId.toString() !== req.user._id) {
+            return res.status(403).send({ success: false, message: 'Not authorized to edit this application.' });
+        }
+        if (application.status !== 'SUBMITTED') {
+            return res.status(400).send({ success: false, message: 'Application is under review and cannot be edited.' });
+        }
+
+        const { applicantName, propertyAddress } = req.body;
+        application.applicantName = applicantName;
+        application.propertyAddress = propertyAddress;
+
+        if (req.file) {
+            application.addressProof = `/uploads/${req.file.filename}`;
+        }
+
+        await application.save();
+        res.status(200).send({ success: true, message: 'Application updated successfully.' });
+
+    } catch (error) {
+        res.status(500).send({ success: false, message: 'Server error while updating application.' });
+    }
+};
+
+// ... (rest of the functions remain the same)
 export const getUserWaterConnections = async (req, res) => {
     try {
         const applications = await WaterConnectionModel.find({ applicantId: req.user._id }).sort({ createdAt: -1 });
