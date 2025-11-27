@@ -23,21 +23,15 @@ export const editDeathCertificate = async (req, res) => {
         application.placeOfDeath = placeOfDeath;
 
         await application.save();
-        
-        // Create a notification for officials
-        const notification = new NotificationModel({
-            message: `Application ${application.applicationNumber} has been updated by the user.`,
-            applicationId: application.applicationNumber,
-            applicationType: 'Death Certificate'
-        });
-        await notification.save();
 
         res.status(200).send({ success: true, message: 'Application updated successfully.' });
 
     } catch (error) {
+        console.error("Update Error:", error);
         res.status(500).send({ success: false, message: 'Server error while updating application.' });
     }
 };
+
 export const applyForDeathCertificate = async (req, res) => {
     try {
       const applicationData = { ...req.body, applicantId: req.user._id };
@@ -57,7 +51,8 @@ export const applyForDeathCertificate = async (req, res) => {
       });
     }
   };
-  export const getUserDeathCertificates = async (req, res) => {
+
+export const getUserDeathCertificates = async (req, res) => {
     try {
       const applications = await DeathCertificateModel.find({
         applicantId: req.user._id,
@@ -72,7 +67,7 @@ export const applyForDeathCertificate = async (req, res) => {
     }
   };
   
-  export const getAllDeathCertificates = async (req, res) => {
+export const getAllDeathCertificates = async (req, res) => {
     try {
       if (req.user.role !== "official") {
         return res
@@ -90,7 +85,7 @@ export const applyForDeathCertificate = async (req, res) => {
     }
   };
   
-  export const updateDeathCertificateStatus = async (req, res) => {
+export const updateDeathCertificateStatus = async (req, res) => {
     try {
       if (req.user.role !== "official") {
         return res
@@ -117,7 +112,7 @@ export const applyForDeathCertificate = async (req, res) => {
     }
   };
   
-  export const deleteDeathCertificate = async (req, res) => {
+export const deleteDeathCertificate = async (req, res) => {
     try {
       if (req.user.role !== "official") {
         return res

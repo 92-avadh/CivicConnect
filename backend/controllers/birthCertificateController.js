@@ -26,19 +26,12 @@ export const editBirthCertificate = async (req, res) => {
             application.hasUnreadUpdate = true;
             
             await application.save();
-
-            const editHistory = new EditHistoryModel({
-                applicationId: application._id,
-                applicationNumber: application.applicationNumber,
-                applicationType: 'Birth Certificate',
-                changes: changes,
-            });
-            await editHistory.save();
         }
 
         res.status(200).send({ success: true, message: 'Application updated successfully.' });
 
     } catch (error) {
+        console.error("Update Error:", error);
         res.status(500).send({ success: false, message: 'Server error while updating application.' });
     }
 };
@@ -59,6 +52,7 @@ export const applyForBirthCertificate = async (req, res) => {
         res.status(500).send({ success: false, message: 'Server error while submitting application.' });
     }
 };
+
 export const getUserBirthCertificates = async (req, res) => {
     try {
         const applications = await BirthCertificateModel.find({ applicantId: req.user._id }).sort({ createdAt: -1 });

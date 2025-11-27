@@ -146,17 +146,29 @@ export const AdminDashboardPage = () => {
         }
     }, [authLoading, currentUser, fetchData]);
 
+    // 👇 RE-EDITED FUNCTION: Optimistic Update Implementation
     const handleUpdateStatus = async (id, status, type) => {
+        // 1. Optimistically update the UI immediately
+        if (type === 'birth-certificates') {
+            setBirthApps(prev => prev.map(app => app._id === id ? { ...app, status } : app));
+        } else if (type === 'death-certificates') {
+            setDeathApps(prev => prev.map(app => app._id === id ? { ...app, status } : app));
+        } else if (type === 'water-connections') {
+            setWaterApps(prev => prev.map(app => app._id === id ? { ...app, status } : app));
+        }
+
         try {
             const token = sessionStorage.getItem('authToken');
+            // 2. Send request to backend
             await axios.put(`${API_BASE_URL}/api/${type}/update-status/${id}`,
                 { status },
                 { headers: { 'x-auth-token': token } }
             );
-            fetchData(); // Refetch data after update
+            // 3. DO NOT call fetchData() here. The UI is already updated.
         } catch (err) {
             console.error('Error updating status:', err);
-            alert('Failed to update status. Please try again.');
+            alert('Failed to update status. Reverting changes.');
+            fetchData(); // Only refetch if the server request FAILED (Rollback)
         }
     };
 
